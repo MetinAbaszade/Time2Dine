@@ -1,0 +1,305 @@
+:root {
+    --primary-color: #0F1C23;  
+    --secondary-color: #EB8317;
+    --third-color: #081014;
+    --text-color: #AD852F;  
+    --text-color-2: #916d21;                  
+    --secondary-background-color: #142a37;  
+    --background-color: #e1e4f3; 
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--background-color);
+    background-image: url(./img/background.jpg);
+    background-size: auto;
+    background-repeat: no-repeat;
+    background-position: top;
+    margin: 0;
+    background-color: var(--primary-color);
+}
+
+footer {
+    display: flex;
+    justify-content: space-around;
+    background-color: var(--secondary-background-color); 
+    flex: 0 0 30%;
+    color: var(--text-color);
+    padding: 15px;
+    text-align: center;
+    align-items: center;
+}
+
+.logo a{
+    font-size: 2em; 
+    font-weight: bold;
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+/* .logo img {
+    
+    height: 70px;
+    width: 150px;
+} */
+
+.user {
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: large;
+}
+
+.user a {
+    color: var(--primary-color);
+    margin: 0 10px;
+    text-decoration: none;
+}
+
+.user #fav, .user #login {
+    margin: 0 10px;
+    background-image: linear-gradient(to right, var(--text-color-2) 10%, var(--text-color) 90%);
+    padding: 10px 15px;
+    border-radius: 35px;
+    color: var(--primary-color);
+    font-weight: bolder;
+    display: flex; 
+    align-items: center; 
+}
+
+.user #fav i, .user #login i{
+    padding-right: 8px;
+}
+
+.search-section {
+    text-align: left;
+    padding: 40px;
+    background-color: var(--secondary-background-color);
+    width: 850px;
+    height: 150px;
+    border-radius: 65px;
+    margin: auto;
+    margin-top: 450px;
+    color: var(--text-color);
+    box-shadow: 7px 20px 0px -7px var(--third-color);
+}
+
+.search-section h1 {
+    font-size:35px;
+    margin: 0;
+}
+
+.search-box {
+    display: flex;
+    gap: 10px;
+    justify-content: left;
+    margin-top: 15px;  
+    font-size: 20px;
+}
+
+.search-section input {
+    padding: 10px;
+    font-size: 1em;
+    color: var(--text-color);
+    border: 3px solid var(--third-color);
+    border-radius: 10px;
+    background-color: var(--secondary-background-color);
+}
+
+.search-button {
+    width: 100%; 
+    display: flex; 
+    justify-content: right; 
+    align-items: center;
+}
+
+.search-section button {
+    margin-right: 0px;
+    margin-top: 12px;
+    background-image: linear-gradient(to right, var(--text-color-2) 10%, var(--text-color) 90%);
+    border-radius: 35px;
+    width: 140px;
+    height: 50px;
+    padding: 5px 15px 5px 15px;
+    color: var(--primary-color);
+    border: 0px;
+    font-size: larger;
+
+}
+
+.search-section button:hover {
+    background-image: none; /* Remove the gradient */
+    background-color: var(--primary-color); /* Slightly lighter shade */
+    color: var(--text-color);
+    border: 2px solid var(--text-color);
+}
+
+.search-section i {
+    margin-right: 10px;
+}
+
+.recommended-restaurants h2, .most-viewed-restaurants h2 {
+    margin-left: 15px;
+}
+
+.recommended-restaurants, .most-viewed-restaurants {
+    padding: 20px;
+    margin: 20px;
+    border-radius: 40px;
+    color: var(--text-color);
+    font-size: 23px;
+    overflow: hidden;
+    height:auto;
+}
+
+.restaurant-list {
+    margin-top: 20px;
+    margin-left: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    justify-content: left;
+    row-gap: 10px;
+    column-gap: 5%;
+}
+    
+.restaurant-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--third-color);
+    padding: 20px;
+    border-radius: 40px;
+    text-align: left;
+    width: 240px;
+    transition: box-shadow 0.5s ease;
+    
+}
+
+.restaurant-item:hover {
+    box-shadow: 0px 0px 20px 1px #fff;
+}
+    
+.restaurant-item img {
+    border-radius: 40px;
+    width: 240px;
+    height: 240px;
+    object-fit: cover; 
+}
+
+.restaurant-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: left;
+    align-content: space-around;
+    width: 100%;
+    margin-top: 15px;
+    margin-left: 15px;
+    color: var(--text-color);
+    font-size: 25px;
+}
+
+.stars {
+    color: var(--text-color);
+    margin-top: 20px;
+    font-size: 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+}
+
+.stars .rate {
+    font-size: 15px;
+}
+
+footer {
+    text-align: center;
+    /* position: fixed; */
+    bottom: 0;
+    left: 0;
+}
+
+.footer-links a {
+    color: var(--text-color);
+    margin: 0 10px;
+    text-decoration: none;
+}
+
+.footer-info p {
+    margin: 10px 0;
+    font-size: 0.9em;
+}
+
+/* Header styling */
+header {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 15px 30px;
+    background-color: var(--secondary-background-color); 
+    color: var(--text-color);
+}
+
+/* .menu-button{
+    margin-right: 10px;
+} */
+
+/* Menu button styling */
+.menu-button a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 1.5em;
+    font-weight: bold;
+    padding: 8px 16px;
+    background-color: var(--primary-color); 
+    border-radius: 30px;
+    transition: background-color 0.3s ease;
+}
+
+.menu-button a:hover {
+    border-radius: 10px;
+    background-color: var(--third-color); /* Hover effect */
+}
+
+.dropdown-menu {
+    list-style: none; /* Remove list bullets */
+    position: absolute; /* Take the menu out of document flow */
+    display: none; /* Hidden by default */
+    background-color: var(--primary-color); /* Background color for dropdown */
+    padding: 15px;
+    border-radius: 10px;
+    top: 35px; /* Adjust this based on header height */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1); /* Optional shadow for dropdown */
+}
+
+.dropdown-menu li {
+    margin-bottom: 5px;
+}
+
+.dropdown-menu a {
+    text-decoration: none;
+    color: var(--text-color);
+    font-size: 1.2em;
+    padding: 10px 20px;
+    display: block; 
+    border-radius: 10px;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-menu a:hover {
+    background-color: var(--third-color); 
+}
+
+.navbar:hover .dropdown-menu {
+    display: block;
+    opacity: 1;
+    pointer-events: auto;
+}
+

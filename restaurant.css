@@ -1,0 +1,130 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #0F1C23; /* Main page background color */
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 10px;
+    text-align: center;
+}
+
+nav a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+}
+
+.restaurant-details {
+    text-align: center;
+    padding: 20px;
+}
+
+.restaurant-details img {
+    max-width: 100%; /* Adjust the width */
+    height: auto; /* Keep the aspect ratio */
+    max-width: 100%; /* Adjust the width */
+    height: auto; /* Keep the aspect ratio */
+    border-radius: 8px; /* Optional: add rounded corners */
+    border-radius: 40px;
+    width: 900px;
+    height: 500px;
+    object-fit: cover; 
+}
+
+
+.restaurant-info h1,
+.restaurant-info p,
+.menu h2,
+.reservation h2 {
+    color: #916d21; /* Change text color to gold */
+}
+
+.menu, .reservation {
+    padding: 20px;
+    border-top: 1px solid #ccc;
+}
+
+.meal-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    color: #916d21; /* Change meal item text color to gold */
+}
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer-links a {
+    color: #916d21; /* Change footer link color to gold */
+    margin: 0 10px;
+}
+
+
+/* Existing styles remain unchanged... */
+
+footer {
+    text-align: center;
+    padding: 10px;
+    background-color: #333;
+    color: white;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+.footer-links a {
+    color: #916d21; /* Change footer link color to gold */
+    margin: 0 10px;
+}
+
+.reservation {
+    padding: 20px;
+    border-top: 1px solid #ccc;
+}
+
+.reservation h2 {
+    color: #916d21; /* Change reservation section header to gold */
+}
+
+.reservation label {
+    color: #916d21; /* Change label text color to gold */
+    
+}
+
+
+input[type="date"],
+input[type="time"],
+select {
+    border: 1px solid #916d21; /* Gold border for inputs */
+    background-color: transparent; /* Transparent background */
+    color: #916d21; /* Gold text color */
+    border-radius: 5px; /* Rounded corners */
+    padding: 5px; /* Padding inside inputs */
+    margin-bottom: 10px; /* Space between inputs */
+}
+
+button {
+    background-color: transparent; /* Transparent background */
+    color: black; /* "Reserve" text color */
+    border: 2px solid #916d21; /* Gold border */
+    border-radius: 5px; /* Rounded corners */
+    padding: 10px 20px; /* Padding for the button */
+    cursor: pointer; /* Pointer on hover */
+    transition: background-color 0.3s, color 0.3s; /* Smooth transition */
+}
+
+button:hover {
+    background-color: #916d21; /* Change background to gold on hover */
+    color: black; /* Keep text color black on hover */
+}

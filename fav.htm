@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Time2Dine Favorites</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="fav.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+  </head>
+
+  <body>
+    <header>
+      <div class="logo">
+        <a href="index.htm">Time2Dine</a>
+      </div>
+      <div class="navbar">
+        <div class="menu-button">
+          <a href="#">Menu</a>
+        </div>
+        <ul class="dropdown-menu">
+          <li><a href="index.htm">Home</a></li>
+          <li><a href="login.htm">Log In</a></li>
+          <li><a href="register.htm">Register</a></li>
+          <li><a href="fav.htm">Favorites</a></li>
+        </ul>
+      </div>
+    </header>
+
+    <section id="favorites" class="recommended-restaurants">
+      <h2>Your Favorites</h2>
+      <div class="restaurant-list">
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-links">
+        <a href="#">Support</a>
+        <a href="imprint.htm">Imprint Page</a>
+        <a href="#">Terms and settings</a>
+      </div>
+      <div class="footer-info">
+        <p>
+          Coronavirus (COVID-19) FAQs | Manage your trips | Contact Customer
+          Service
+        </p>
+        <p>Privacy & cookies | Terms and conditions | Dispute resolution</p>
+      </div>
+    </footer>
+
+    <script>
+      const customerId = "71a77d69-7b80-11ef-9c88-00090ffe0001"; 
+
+      fetch(`http://localhost:5001/get_favorites/${customerId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          let favoritesArray = data; 
+          const restaurantList = document.querySelector(".restaurant-list");
+          
+          function renderFavorites() {
+            restaurantList.innerHTML = "";
+
+            favoritesArray.forEach((favorite, index) => {
+              const foodSpotItem = document.createElement("div");
+              foodSpotItem.classList.add("restaurant-item");
+
+              foodSpotItem.innerHTML = `
+                <img src="${favorite.ImageUrl}" alt="FoodSpot Image" />
+                <div class="restaurant-info">
+                  <span>${favorite.Name}</span>
+                  <div class="stars">
+                    <span class="rate">Rate</span>
+                    <span>${"★".repeat(Math.round(favorite.Rating))}</span>
+                  </div>
+                  <div class="addtofav">
+                    <i class="${
+                      favorite.isFavorite ? "fa-solid" : "fa-regular"
+                    } fa-heart"></i>
+                  </div>
+                </div>
+              `;
+
+              const heartIcon = foodSpotItem.querySelector(".addtofav i");
+              heartIcon.addEventListener("click", (event) => {
+                event.stopPropagation();
+                
+                favorite.isFavorite = !favorite.isFavorite;
+
+                if (favorite.isFavorite) {
+                  heartIcon.classList.remove("fa-regular");
+                  heartIcon.classList.add("fa-solid");
+                  console.log(`Added ${favorite.Name} to favorites`);
+
+                  fetch("http://127.0.0.1:5001/toggle_favorite", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      foodSpotId: favorite.FoodSpotId,
+                      customerId: customerId,
+                    }),
+                  })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      if (data.message) {
+                        console.log(data.message);
+                      }
+                    })
+                    .catch((error) => {
+                      console.error("Error adding to favorites:", error);
+                    });
+                } else {
+                  heartIcon.classList.remove("fa-solid");
+                  heartIcon.classList.add("fa-regular");
+                  console.log(`Removed ${favorite.Name} from favorites`);
+
+                  // API call to remove from favorites
+                  fetch("http://127.0.0.1:5001/toggle_favorite", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      foodSpotId: favorite.FoodSpotId,
+                      customerId: customerId,
+                    }),
+                  })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      if (data.message) {
+                        console.log(data.message);
+                        favoritesArray.splice(index, 1);
+                        renderFavorites();
+                      }
+                    })
+                    .catch((error) => {
+                      console.error("Error removing from favorites:", error);
+                    });
+                }
+              });
+              foodSpotItem.addEventListener("click", () => {
+                window.location.href = `restaurant.htm?id=${favorite.FoodSpotId}`;
+              });
+              restaurantList.appendChild(foodSpotItem);
+            });
+          }
+          renderFavorites();
+        })
+        .catch((error) => console.error("Error fetching favorite food spots:", error));
+    </script>
+  </body>
+</html>

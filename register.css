@@ -1,0 +1,15 @@
+.mt-5 {
+    width: 600px !important;
+}
+
+.form-control {
+    width: 500px;
+}
+
+#registerForm {
+    display: flex;
+    flex-direction: column; /* Stack fields vertically */
+    align-items: center; /*Center the form contents*/
+    gap: 5px; /* Add space between each form field */
+}
+
