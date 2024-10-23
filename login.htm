@@ -65,7 +65,7 @@
             messageElement.innerHTML = '';
 
             if (response.ok) {
-                // On successful login, redirect to index.htm
+                console.log(result)
                 window.location.href = 'index.htm';
             } else {
                 messageElement.innerHTML = `<div class="alert alert-danger"> ${result.error}</div>`;
