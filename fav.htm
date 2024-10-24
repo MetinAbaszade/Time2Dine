@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Time2Dine Favorites</title>
     <link rel="stylesheet" href="style.css" />
-    <link rel="stylesheet" href="fav.css">
+    <link rel="stylesheet" href="fav.css" />
+    <script src="utils.js"></script>
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
@@ -36,6 +37,7 @@
         <input
           style="width: 100%"
           type="text"
+          id="search-input"
           placeholder="Restaurant & Café"
         />
         <i class="fa-solid fa-magnifying-glass"></i>
@@ -44,8 +46,7 @@
 
     <section id="favorites" class="recommended-restaurants">
       <h2>Your Favorites</h2>
-      <div class="restaurant-list">
-      </div>
+      <div class="restaurant-list"></div>
     </section>
 
     <footer>
@@ -64,118 +65,133 @@
     </footer>
 
     <script>
-      async function fetchFoodSpots(query = "") {
+      const token = getcookie("token");
+
+      // Function to debounce input
+      function debounce(func, delay) {
+        let timeout;
+        return function (...args) {
+          clearTimeout(timeout);
+          timeout = setTimeout(() => func.apply(this, args), delay);
+        };
+      }
+
+      async function fetchFavorites(query = "") {
         try {
           const response = await fetch(
-            `http://127.0.0.1:5001/get_foodspots?q=${query}`
+            `http://localhost:5001/get_favorites?q=${encodeURIComponent(query)}`,
+            {
+              headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json",
+              },
+            }
           );
-          const foodSpots = await response.json();
-          console.log(foodSpots);
-
+          if (response.status === 401) {
+            window.location.href = "login.htm";
+            return;
+          }
+          const favoritesArray = await response.json();
+          renderFavorites(favoritesArray);
         } catch (error) {
-          console.error("Error fetching food spots:", error);
+          console.error("Error fetching favorite food spots:", error);
         }
       }
 
-      const customerId = "71a77d69-7b80-11ef-9c88-00090ffe0001"; 
+      function renderFavorites(favoritesArray) {
+        const restaurantList = document.querySelector(".restaurant-list");
+        restaurantList.innerHTML = "";
 
-      fetch(`http://localhost:5001/get_favorites/${customerId}`)
-        .then((response) => response.json())
-        .then((data) => {
-          let favoritesArray = data; 
-          const restaurantList = document.querySelector(".restaurant-list");
-          
-          function renderFavorites() {
-            restaurantList.innerHTML = "";
+        favoritesArray.forEach((favorite, index) => {
+          const foodSpotItem = document.createElement("div");
+          foodSpotItem.classList.add("restaurant-item");
 
-            favoritesArray.forEach((favorite, index) => {
-              const foodSpotItem = document.createElement("div");
-              foodSpotItem.classList.add("restaurant-item");
-
-              foodSpotItem.innerHTML = `
-                <img src="${favorite.ImageUrl}" alt="FoodSpot Image" />
-                <div class="restaurant-info">
-                  <span>${favorite.Name}</span>
-                  <div class="stars">
-                    <span class="rate">Rate</span>
-                    <span>${"★".repeat(Math.round(favorite.Rating))}</span>
-                  </div>
-                  <div class="addtofav">
-                    <i class="${
-                      favorite.isFavorite ? "fa-solid" : "fa-regular"
-                    } fa-heart"></i>
-                  </div>
+          foodSpotItem.innerHTML = `
+              <img src="${favorite.ImageUrl}" alt="FoodSpot Image" />
+              <div class="restaurant-info">
+                <span>${favorite.Name}</span>
+                <div class="stars">
+                  <span class="rate">Rate</span>
+                  <span>${"★".repeat(Math.round(favorite.Rating))}</span>
                 </div>
-              `;
+                <div class="addtofav">
+                  <i class="${
+                    favorite.isFavorite ? "fa-solid" : "fa-regular"
+                  } fa-heart"></i>
+                </div>
+              </div>`;
 
-              const heartIcon = foodSpotItem.querySelector(".addtofav i");
-              heartIcon.addEventListener("click", (event) => {
-                event.stopPropagation();
-                
-                favorite.isFavorite = !favorite.isFavorite;
+          const heartIcon = foodSpotItem.querySelector(".addtofav i");
+          heartIcon.addEventListener("click", (event) => {
+            event.stopPropagation();
+            toggleFavorite(favorite, heartIcon, index, favoritesArray);
+          });
 
-                if (favorite.isFavorite) {
-                  heartIcon.classList.remove("fa-regular");
-                  heartIcon.classList.add("fa-solid");
-                  console.log(`Added ${favorite.Name} to favorites`);
+          foodSpotItem.addEventListener("click", () => {
+            window.location.href = `restaurant.htm?id=${favorite.FoodSpotId}`;
+          });
+          restaurantList.appendChild(foodSpotItem);
+        });
+      }
 
-                  fetch("http://127.0.0.1:5001/toggle_favorite", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                      foodSpotId: favorite.FoodSpotId,
-                      customerId: customerId,
-                    }),
-                  })
-                    .then((response) => response.json())
-                    .then((data) => {
-                      if (data.message) {
-                        console.log(data.message);
-                      }
-                    })
-                    .catch((error) => {
-                      console.error("Error adding to favorites:", error);
-                    });
-                } else {
-                  heartIcon.classList.remove("fa-solid");
-                  heartIcon.classList.add("fa-regular");
-                  console.log(`Removed ${favorite.Name} from favorites`);
+      function toggleFavorite(favorite, heartIcon, index, favoritesArray) {
+        favorite.isFavorite = !favorite.isFavorite;
 
-                  // API call to remove from favorites
-                  fetch("http://127.0.0.1:5001/toggle_favorite", {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                      foodSpotId: favorite.FoodSpotId,
-                      customerId: customerId,
-                    }),
-                  })
-                    .then((response) => response.json())
-                    .then((data) => {
-                      if (data.message) {
-                        console.log(data.message);
-                        favoritesArray.splice(index, 1);
-                        renderFavorites();
-                      }
-                    })
-                    .catch((error) => {
-                      console.error("Error removing from favorites:", error);
-                    });
-                }
-              });
-              foodSpotItem.addEventListener("click", () => {
-                window.location.href = `restaurant.htm?id=${favorite.FoodSpotId}`;
-              });
-              restaurantList.appendChild(foodSpotItem);
-            });
-          }
-          renderFavorites();
+        if (favorite.isFavorite) {
+          heartIcon.classList.remove("fa-regular");
+          heartIcon.classList.add("fa-solid");
+          console.log(`Added ${favorite.Name} to favorites`);
+        } else {
+          heartIcon.classList.remove("fa-solid");
+          heartIcon.classList.add("fa-regular");
+          console.log(`Removed ${favorite.Name} from favorites`);
+        }
+
+        fetch("http://127.0.0.1:5001/toggle_favorite", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            foodSpotId: favorite.FoodSpotId,
+          }),
         })
-        .catch((error) => console.error("Error fetching favorite food spots:", error));
+          .then((response) => {
+            if (response.status === 401) {
+              window.location.href = "login.htm";
+              return;
+            }
+            return response.json();
+          })
+          .then((data) => {
+            if (data.message) {
+              console.log(data.message);
+              if (!favorite.isFavorite) {
+                favoritesArray.splice(index, 1); // Remove from array
+                renderFavorites(favoritesArray); // Re-render favorites
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Error toggling favorite:", error);
+          });
+      }
+
+      // Debounced version of fetchFavorites
+      const debouncedFetchFavorites = debounce(fetchFavorites, 300);
+
+      // Event listener for search input with debounce
+      const searchInput = document.getElementById("search-input");
+      searchInput.addEventListener("input", (event) => {
+        const query = event.target.value;
+        debouncedFetchFavorites(query); // Fetch favorites based on search query with debounce
+      });
+
+      // Initial fetch of favorites without search
+      window.onload = function () {
+        fetchFavorites();
+      };
     </script>
   </body>
 </html>

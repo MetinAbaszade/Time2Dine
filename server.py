@@ -58,9 +58,7 @@ def token_required(f):
         token = request.headers.get('Authorization')
         if not token:
             return jsonify({'message': 'Token is missing!'}), 401
-
         try:
-            # Extract token from 'Bearer token'
             token = token.split(" ")[1] 
             jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
         except jwt.ExpiredSignatureError:
@@ -128,18 +126,23 @@ def login():
     cursor = conn.cursor()
 
     try:
-        # Check if the user exists and the password matches
-        login_query = "SELECT * FROM users WHERE Email = %s AND Password = %s"
+        # Join the Users and Customer tables to retrieve Customer.Id
+        login_query = """
+            SELECT c.Id as customer_Id
+            FROM users u
+            JOIN customer c ON u.Id = c.UserId
+            WHERE u.Email = %s AND u.Password = %s
+        """
         cursor.execute(login_query, (email, password))
-        user = cursor.fetchone()
+        customer = cursor.fetchone()
 
-        if user:
-           user_id = user[0]  # Assuming the first element is user ID
-           token = generate_jwt_token(user_id)
-           return jsonify({
-               'message': 'Login successful',
-               'token': token,
-               'userId': user_id
+        if customer:
+            customer_id = customer[0]  # Assuming the first element is customer_Id
+            token = generate_jwt_token(customer_id)
+            return jsonify({
+                'message': 'Login successful',
+                'token': token,
+                'customerId': customer_id  # Send customer_Id instead of user_id
             }), 200
         else:
             return jsonify({'error': 'Invalid email or password'}), 401
@@ -152,9 +155,10 @@ def login():
 @app.route('/toggle_favorite', methods=['POST'])
 @token_required
 def toggle_favorite():
+    user_id = extract_user_id_from_token()
     data = request.json
     food_spot_id = data['foodSpotId']
-    user_id = extract_user_id_from_token()
+    print(f"favourites e sorqu gelidiiididididi: {user_id} \n {food_spot_id}")
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -193,6 +197,7 @@ def toggle_favorite():
 @token_required
 def get_favorites():
     user_id = extract_user_id_from_token()
+    search_query = request.args.get('q', '')
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
@@ -215,8 +220,14 @@ def get_favorites():
             LEFT JOIN cafe c ON fs.Id = c.FoodSpotId
             WHERE f.CustomerId = %s
         """
-        # Use user_id from the decoded JWT token as the customerId
-        cursor.execute(favorites_query, (user_id,))
+
+        # If a search query is provided, add a LIKE clause to filter by name
+        if search_query:
+            favorites_query += " AND fs.Name LIKE %s"
+            cursor.execute(favorites_query, (user_id, f'%{search_query}%'))
+        else:
+            cursor.execute(favorites_query, (user_id,))
+
         favorites = cursor.fetchall()
 
         # Convert any datetime or timedelta values to strings for JSON serialization
