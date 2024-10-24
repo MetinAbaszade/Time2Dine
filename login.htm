@@ -65,6 +65,8 @@
             messageElement.innerHTML = '';
 
             if (response.ok) {
+                const token = result.token;
+                document.cookie = `token=${token};`
                 console.log(result)
                 window.location.href = 'index.htm';
             } else {

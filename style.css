@@ -303,3 +303,6 @@ header {
     pointer-events: auto;
 }
 
+.search-button a{
+    cursor: pointer;
+}

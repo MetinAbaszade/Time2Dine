@@ -30,6 +30,18 @@
       </div>
     </header>
 
+    <section id="search" class="search-section">
+      <h1>Search Here</h1>
+      <div class="search-box">
+        <input
+          style="width: 100%"
+          type="text"
+          placeholder="Restaurant & Café"
+        />
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+    </section>
+
     <section id="favorites" class="recommended-restaurants">
       <h2>Your Favorites</h2>
       <div class="restaurant-list">
@@ -52,6 +64,19 @@
     </footer>
 
     <script>
+      async function fetchFoodSpots(query = "") {
+        try {
+          const response = await fetch(
+            `http://127.0.0.1:5001/get_foodspots?q=${query}`
+          );
+          const foodSpots = await response.json();
+          console.log(foodSpots);
+
+        } catch (error) {
+          console.error("Error fetching food spots:", error);
+        }
+      }
+
       const customerId = "71a77d69-7b80-11ef-9c88-00090ffe0001"; 
 
       fetch(`http://localhost:5001/get_favorites/${customerId}`)
