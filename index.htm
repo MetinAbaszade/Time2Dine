@@ -18,6 +18,32 @@
     <title>Time2Dine</title>
 
     <script>
+      // Function to get token from cookie
+      function getcookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+      }
+
+      // Token check
+      window.onload = function () {
+        const token = getcookie("token");
+        if (!token) {
+          // Redirect to login page immediately if token is missing
+          window.location.href = "login.htm";
+        } else {
+          // Show the body if the token exists
+          document.body.style.display = "block";
+          fetchFoodSpots(); // Fetch food spots when token exists
+        }
+
+        // Attach search input debounce functionality
+        const searchInput = document.querySelector(
+          '.search-box input[type="text"]'
+        );
+        searchInput.addEventListener("input", debouncedFetchFoodSpots);
+      };
+
       function debounce(func, delay) {
         let timeout;
         return function (...args) {
@@ -25,114 +51,111 @@
           timeout = setTimeout(() => func.apply(this, args), delay);
         };
       }
-      function getcookie (name) {
-        console.log("myauuu")
-        console.log(document.cookie)
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(';').shift();
-      }
 
       // Function to fetch filtered food spots based on the search query
       async function fetchFoodSpots(query = "") {
         try {
-          const token = getcookie("token")
-          console.log(token)
+          const token = getcookie("token");
           const response = await fetch(
             `http://127.0.0.1:5001/get_foodspots?q=${query}`,
             {
               method: "GET",
               headers: {
-                "Authorization": `Bearer ${token}`, 
+                Authorization: `Bearer ${token}`,
                 "Content-Type": "application/json",
               },
             }
           );
-          const foodSpots = await response.json();
-          console.log(foodSpots);
+          if (response.status === 401) {
+            // Redirect to login page if unauthorized
+            window.location.href = "login.htm";
+          } else if (response.ok) {
+            const foodSpots = await response.json();
+            console.log(foodSpots);
 
-          const restaurantList = document.querySelector(".restaurant-list");
-          restaurantList.innerHTML = ""; 
+            const restaurantList = document.querySelector(".restaurant-list");
+            restaurantList.innerHTML = "";
 
-          foodSpots.forEach((foodSpot) => {
-            const foodSpotItem = document.createElement("div");
-            foodSpotItem.classList.add("restaurant-item");
+            foodSpots.forEach((foodSpot) => {
+              const foodSpotItem = document.createElement("div");
+              foodSpotItem.classList.add("restaurant-item");
 
-            foodSpotItem.innerHTML = `
-              <img src="${foodSpot.ImageUrl}" alt="Restaurant Image" />
-              <div class="restaurant-info">
-                <span>${foodSpot.Name}</span>
-                <div class="stars">
-                  <span class="rate">Rate</span>
-                  <span>${"★".repeat(Math.round(foodSpot.Rating))}</span>
+              foodSpotItem.innerHTML = `
+                <img src="${foodSpot.ImageUrl}" alt="Restaurant Image" />
+                <div class="restaurant-info">
+                  <span>${foodSpot.Name}</span>
+                  <div class="stars">
+                    <span class="rate">Rate</span>
+                    <span>${"★".repeat(Math.round(foodSpot.Rating))}</span>
+                  </div>
+                  <div class="addtofav">
+                    <i class="${
+                      foodSpot.IsFavorite == 1 ? "fa-solid" : "fa-regular"
+                    } fa-heart"></i>
+                  </div>
                 </div>
-                <div class="addtofav">
-                  <i class="${
-                    foodSpot.IsFavorite == 1 ? "fa-solid" : "fa-regular"
-                  } fa-heart"></i>
-                </div>
-              </div>
-            `;
+              `;
 
-            const heartIcon = foodSpotItem.querySelector(".addtofav i");
-            heartIcon.addEventListener("click", (event) => {
-              event.stopPropagation();
-              foodSpot.IsFavorite = !foodSpot.IsFavorite;
-              if (foodSpot.IsFavorite) {
-                heartIcon.className = "";
-                heartIcon.classList.add("fa-solid", "fa-heart");
-                console.log(`Added ${foodSpot.Name} to favorites`);
-                
-                fetch("http://127.0.0.1:5001/toggle_favorite", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    foodSpotId: foodSpot.FoodSpotId,
-                    customerId: "71a77d69-7b80-11ef-9c88-00090ffe0001",
-                  }),
-                })
-                  .then((response) => response.json())
-                  .then((data) => {
-                    if (data.message) {
-                      console.log(data.message);
-                    }
-                  })
-                  .catch((error) => {
-                    console.error("Error adding to favorites:", error);
-                  });
-              } else {
-                heartIcon.className = "";
-                heartIcon.classList.add("fa-regular", "fa-heart");
-                console.log(`Removed ${foodSpot.Name} from favorites`);
-                fetch("http://127.0.0.1:5001/toggle_favorite", {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    foodSpotId: foodSpot.FoodSpotId,
-                    customerId: "71a77d69-7b80-11ef-9c88-00090ffe0001",
-                  }),
-                })
-                  .then((response) => response.json())
-                  .then((data) => {
-                    if (data.message) {
-                      console.log(data.message);
-                    }
-                  })
-                  .catch((error) => {
-                    console.error("Error removing from favorites:", error);
-                  });
-              }
-            });
+              const heartIcon = foodSpotItem.querySelector(".addtofav i");
+              heartIcon.addEventListener("click", (event) => {
+                event.stopPropagation();
+                foodSpot.IsFavorite = !foodSpot.IsFavorite;
+                if (foodSpot.IsFavorite) {
+                  heartIcon.className = "";
+                  heartIcon.classList.add("fa-solid", "fa-heart");
+                  console.log(`Added ${foodSpot.Name} to favorites`);
 
-            foodSpotItem.addEventListener("click", () => {
-              window.location.href = `restaurant.htm?id=${foodSpot.FoodSpotId}`;
+                  fetch("http://127.0.0.1:5001/toggle_favorite", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      foodSpotId: foodSpot.FoodSpotId,
+                      customerId: "71a77d69-7b80-11ef-9c88-00090ffe0001",
+                    }),
+                  })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      if (data.message) {
+                        console.log(data.message);
+                      }
+                    })
+                    .catch((error) => {
+                      console.error("Error adding to favorites:", error);
+                    });
+                } else {
+                  heartIcon.className = "";
+                  heartIcon.classList.add("fa-regular", "fa-heart");
+                  console.log(`Removed ${foodSpot.Name} from favorites`);
+                  fetch("http://127.0.0.1:5001/toggle_favorite", {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                      foodSpotId: foodSpot.FoodSpotId,
+                      customerId: "71a77d69-7b80-11ef-9c88-00090ffe0001",
+                    }),
+                  })
+                    .then((response) => response.json())
+                    .then((data) => {
+                      if (data.message) {
+                        console.log(data.message);
+                      }
+                    })
+                    .catch((error) => {
+                      console.error("Error removing from favorites:", error);
+                    });
+                }
+              });
+
+              foodSpotItem.addEventListener("click", () => {
+                window.location.href = `restaurant.htm?id=${foodSpot.FoodSpotId}`;
+              });
+              restaurantList.appendChild(foodSpotItem);
             });
-            restaurantList.appendChild(foodSpotItem);
-          });
+          }
         } catch (error) {
           console.error("Error fetching food spots:", error);
         }
@@ -140,21 +163,12 @@
 
       const debouncedFetchFoodSpots = debounce(function (event) {
         const query = event.target.value;
-        fetchFoodSpots(query); 
-      }, 300); 
-
-      window.onload = function () {
-        fetchFoodSpots(); 
-
-        const searchInput = document.querySelector(
-          '.search-box input[type="text"]'
-        );
-        searchInput.addEventListener("input", debouncedFetchFoodSpots);
-      };
+        fetchFoodSpots(query);
+      }, 300);
     </script>
   </head>
 
-  <body>
+  <body style="display: none;">
     <header>
       <div class="logo">
         <a href="index.htm"> Time2Dine </a>
@@ -198,8 +212,7 @@
 
     <section id="restaurants" class="recommended-restaurants">
       <h2>Recommended Restaurants & Cafés</h2>
-      <div class="restaurant-list">
-      </div>
+      <div class="restaurant-list"></div>
     </section>
 
     <footer>

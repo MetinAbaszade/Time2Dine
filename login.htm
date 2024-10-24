@@ -67,7 +67,6 @@
             if (response.ok) {
                 const token = result.token;
                 document.cookie = `token=${token};`
-                console.log(result)
                 window.location.href = 'index.htm';
             } else {
                 messageElement.innerHTML = `<div class="alert alert-danger"> ${result.error}</div>`;
