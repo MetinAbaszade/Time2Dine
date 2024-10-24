@@ -25,12 +25,28 @@
           timeout = setTimeout(() => func.apply(this, args), delay);
         };
       }
+      function getcookie (name) {
+        console.log("myauuu")
+        console.log(document.cookie)
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+      }
 
       // Function to fetch filtered food spots based on the search query
       async function fetchFoodSpots(query = "") {
         try {
+          const token = getcookie("token")
+          console.log(token)
           const response = await fetch(
-            `http://127.0.0.1:5001/get_foodspots?q=${query}`
+            `http://127.0.0.1:5001/get_foodspots?q=${query}`,
+            {
+              method: "GET",
+              headers: {
+                "Authorization": `Bearer ${token}`, 
+                "Content-Type": "application/json",
+              },
+            }
           );
           const foodSpots = await response.json();
           console.log(foodSpots);
