@@ -79,7 +79,7 @@
       async function fetchFavorites(query = "") {
         try {
           const response = await fetch(
-            `http://localhost:5001/get_favorites?q=${encodeURIComponent(query)}`,
+            `http://localhost:8024/get_favorites?q=${encodeURIComponent(query)}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
@@ -147,7 +147,7 @@
           console.log(`Removed ${favorite.Name} from favorites`);
         }
 
-        fetch("http://127.0.0.1:5001/toggle_favorite", {
+        fetch("http://127.0.0.1:8024/toggle_favorite", {
           method: "POST",
           headers: {
             Authorization: `Bearer ${token}`,
