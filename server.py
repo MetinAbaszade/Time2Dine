@@ -11,25 +11,25 @@ CORS(app, resources={r"/*": {"origins": "*"}})
  # JWT secret key
 SECRET_KEY = 'QABIL TURKOQLU' 
 
-# Set up SSH tunnel with a different local bind port
-tunnel = SSHTunnelForwarder(
-    ('5.75.182.107', 22),  
-    ssh_username='bgazanfar',  
-    ssh_password='MdEbbp',
-    remote_bind_address=('127.0.0.1', 3306),
-    local_bind_address=('127.0.0.1', 10022),  
-    set_keepalive=60
-)
+# # Set up SSH tunnel with a different local bind port
+# tunnel = SSHTunnelForwarder(
+#     ('5.75.182.107', 22),  
+#     ssh_username='bgazanfar',  
+#     ssh_password='MdEbbp',
+#     remote_bind_address=('127.0.0.1', 3306),
+#     local_bind_address=('127.0.0.1', 10022),  
+#     set_keepalive=60
+# )
 
-# Start the SSH tunnel
-tunnel.start()
+# # Start the SSH tunnel
+# tunnel.start()
 
 db_config = {
     'host': '127.0.0.1',
     'user': 'bgazanfar',
     'password': 'MdEbbp',
     'database': 'bgazanfar_db',
-    'port': tunnel.local_bind_port, 
+    #'port': tunnel.local_bind_port, 
     'connection_timeout': 10  
 }
 
