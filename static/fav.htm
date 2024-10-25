@@ -79,7 +79,7 @@
       async function fetchFavorites(query = "") {
         try {
           const response = await fetch(
-            `http://localhost:8024/get_favorites?q=${encodeURIComponent(query)}`,
+            `http://5.75.182.107:8024/get_favorites?q=${encodeURIComponent(query)}`,
             {
               headers: {
                 Authorization: `Bearer ${token}`,
