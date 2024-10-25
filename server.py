@@ -100,8 +100,8 @@ def token_required(f):
     return decorated
 
 def get_db_connection():
-    print(f"Tunnel is active: {tunnel.is_active}")
-    print(f"Local bind port: {tunnel.local_bind_port}")
+#     print(f"Tunnel is active: {tunnel.is_active}")
+#     print(f"Local bind port: {tunnel.local_bind_port}")
     test= mysql.connector.connect(**db_config)
     return test
 
