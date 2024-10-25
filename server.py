@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS 
 import mysql.connector, datetime
 from sshtunnel import SSHTunnelForwarder
@@ -32,6 +32,35 @@ db_config = {
     'port': tunnel.local_bind_port, 
     'connection_timeout': 10  
 }
+
+@app.route('/')
+def root():
+    return send_from_directory('static', 'index.htm')
+
+@app.route('/index.htm')
+def serve_index():
+    return send_from_directory('static', 'index.htm')
+
+@app.route('/login.htm')
+def serve_login():
+    return send_from_directory('static', 'login.htm')
+
+@app.route('/register.htm')
+def serve_register():
+    return send_from_directory('static', 'register.htm')
+
+@app.route('/restaurant.htm')
+def serve_restaurant():
+    return send_from_directory('static', 'restaurant.htm')
+
+@app.route('/fav.htm')
+def serve_fav():
+    return send_from_directory('static', 'fav.htm')
+
+@app.route('/imprint.htm')
+def serve_imprint():
+    return send_from_directory('static', 'imprint.htm')
+
 
 def extract_user_id_from_token():
     token = request.headers.get('Authorization')
