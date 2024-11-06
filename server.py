@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS 
 import mysql.connector, datetime
 from sshtunnel import SSHTunnelForwarder
@@ -11,27 +11,56 @@ CORS(app, resources={r"/*": {"origins": "*"}})
  # JWT secret key
 SECRET_KEY = 'QABIL TURKOQLU' 
 
-# Set up SSH tunnel with a different local bind port
-tunnel = SSHTunnelForwarder(
-    ('5.75.182.107', 22),  
-    ssh_username='bgazanfar',  
-    ssh_password='MdEbbp',
-    remote_bind_address=('127.0.0.1', 3306),
-    local_bind_address=('127.0.0.1', 10022),  
-    set_keepalive=60
-)
+# # Set up SSH tunnel with a different local bind port
+# tunnel = SSHTunnelForwarder(
+#     ('5.75.182.107', 22),  
+#     ssh_username='bgazanfar',  
+#     ssh_password='MdEbbp',
+#     remote_bind_address=('127.0.0.1', 3306),
+#     local_bind_address=('127.0.0.1', 10022),  
+#     set_keepalive=60
+# )
 
-# Start the SSH tunnel
-tunnel.start()
+# # Start the SSH tunnel
+# tunnel.start()
 
 db_config = {
     'host': '127.0.0.1',
     'user': 'bgazanfar',
     'password': 'MdEbbp',
     'database': 'bgazanfar_db',
-    'port': tunnel.local_bind_port, 
+    #'port': tunnel.local_bind_port, 
     'connection_timeout': 10  
 }
+
+@app.route('/')
+def root():
+    return send_from_directory('static', 'index.htm')
+
+@app.route('/index.htm')
+def serve_index():
+    return send_from_directory('static', 'index.htm')
+
+@app.route('/login.htm')
+def serve_login():
+    return send_from_directory('static', 'login.htm')
+
+@app.route('/register.htm')
+def serve_register():
+    return send_from_directory('static', 'register.htm')
+
+@app.route('/restaurant.htm')
+def serve_restaurant():
+    return send_from_directory('static', 'restaurant.htm')
+
+@app.route('/fav.htm')
+def serve_fav():
+    return send_from_directory('static', 'fav.htm')
+
+@app.route('/imprint.htm')
+def serve_imprint():
+    return send_from_directory('static', 'imprint.htm')
+
 
 def extract_user_id_from_token():
     token = request.headers.get('Authorization')
@@ -71,8 +100,8 @@ def token_required(f):
     return decorated
 
 def get_db_connection():
-    print(f"Tunnel is active: {tunnel.is_active}")
-    print(f"Local bind port: {tunnel.local_bind_port}")
+#     print(f"Tunnel is active: {tunnel.is_active}")
+#     print(f"Local bind port: {tunnel.local_bind_port}")
     test= mysql.connector.connect(**db_config)
     return test
 
@@ -324,4 +353,4 @@ def get_foodspot(foodspot_id):
         conn.close()
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5001, debug=True)
+    app.run(host='0.0.0.0', port=8024, debug=True)

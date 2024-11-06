@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/restaurant.css" />
+    <script src="/static/utils.js"></script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <title>Restaurant/Cafe Details</title>
+  </head>
+  <body>
+    <header>
+      <div class="logo">Time2Dine</div>
+      <nav>
+        <a href="#">Home</a>
+        <a href="login.htm">Log In</a>
+        <a href="register.htm">Register</a>
+        <a href="fav.htm">Favorites</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="restaurant-details">
+        <img id="restaurantImage" src="" alt="FoodSpot Image" />
+        <div class="restaurant-info">
+          <h1 id="restaurantName">FoodSpot Name</h1>
+          <p id="address">Address: Loading...</p>
+          <p id="rating">Rating: ★★★★★</p>
+          <p id="foodSpotType">Type: Loading...</p>
+        </div>
+      </section>
+
+      <section class="menu" id="menuSection">
+        <h2>Menu</h2>
+      </section>
+
+      <section class="reservation">
+        <h2>Make a Reservation</h2>
+        <form id="reservationForm">
+          <label for="people">Number of People:</label>
+          <select id="people" name="people">
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+          </select>
+
+          <label for="date">Date:</label>
+          <input type="date" id="date" name="date" required />
+
+          <label for="time">Time:</label>
+          <input type="time" id="time" name="time" required />
+
+          <button type="submit">Reserve Now</button>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 Time2Dine. All rights reserved.</p>
+    </footer>
+
+    <footer>
+      <div class="footer-links">
+        <a href="#">Support</a>
+        <a href="imprint.htm">Imprint</a>
+        <a href="#">Terms and settings</a>
+      </div>
+      <div class="footer-info">
+        <p>
+          Coronavirus (COVID-19) FAQs | Manage your trips | Contact Customer
+          Service
+        </p>
+        <p>Privacy & cookies | Terms and conditions | Dispute resolution</p>
+      </div>
+    </footer>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const foodSpotId = urlParams.get("id");
+        const token = getcookie("token");
+
+        if (foodSpotId) {
+          fetchFoodSpotDetails(foodSpotId);
+          //fetchMenuItems(foodSpotId);
+        }
+
+        // Function to fetch FoodSpot details
+        function fetchFoodSpotDetails(id) {
+          fetch(`http://5.75.182.107:8024/get_foodspot/${id}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          })
+            .then((response) => {
+              console.log(response);
+              return response.json();
+            })
+            .then((data) => {
+              if (data) {
+                document.getElementById("restaurantName").innerText = data.Name;
+                document.getElementById("restaurantImage").src = data.ImageUrl;
+                document.getElementById(
+                  "address"
+                ).innerText = `Address: ${data.Address}`;
+                document.getElementById(
+                  "rating"
+                ).innerText = `Rating: ${data.Rating} ★`;
+                document.getElementById(
+                  "foodSpotType"
+                ).innerText = `Type: ${data.FoodSpotType}`;
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching food spot details:", error);
+            });
+        }
+
+        // Handle reservation form submission
+        const reservationForm = document.getElementById("reservationForm");
+        reservationForm.addEventListener("submit", function (event) {
+          event.preventDefault();
+
+          const formData = {
+            people: document.getElementById("people").value,
+            date: document.getElementById("date").value,
+            time: document.getElementById("time").value,
+            foodSpotId: foodSpotId,
+          };
+
+          fetch("/api/make_reservation", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              alert("Reservation made successfully!");
+            })
+            .catch((error) => {
+              console.error("Error making reservation:", error);
+            });
+        });
+      });
+    </script>
+  </body>
+</html>
