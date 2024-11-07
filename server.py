@@ -38,19 +38,19 @@ def root():
     return send_from_directory('static', 'index.htm')
 
 @app.route('/admin')
-def root():
+def serve_admin():
     return send_from_directory('static', 'admin.htm')
 
 @app.route('/admin.htm')
-def root():
+def server_admin_page():
     return send_from_directory('static', 'admin.htm')
 
 @app.route('/restaurant_add.htm')
-def root():
+def serve_restaurant_add_page():
     return send_from_directory('static', 'restaurant_add.htm')
 
 @app.route('/user_add.htm')
-def root():
+def serve_user_add_page():
     return send_from_directory('static', 'user_add.htm')
 
 @app.route('/index.htm')
