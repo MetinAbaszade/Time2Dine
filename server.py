@@ -37,6 +37,22 @@ db_config = {
 def root():
     return send_from_directory('static', 'index.htm')
 
+@app.route('/admin')
+def root():
+    return send_from_directory('static', 'admin.htm')
+
+@app.route('/admin.htm')
+def root():
+    return send_from_directory('static', 'admin.htm')
+
+@app.route('/restaurant_add.htm')
+def root():
+    return send_from_directory('static', 'restaurant_add.htm')
+
+@app.route('/user_add.htm')
+def root():
+    return send_from_directory('static', 'user_add.htm')
+
 @app.route('/index.htm')
 def serve_index():
     return send_from_directory('static', 'index.htm')
