@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/admin.css">
+    <title>Admin</title>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <a href="index.htm"> Time2Dine </a>
+    </div>
+
+    <div class="navbar">
+      <div class="menu-button">
+        <a href="#">Manage</a>
+      </div>
+      <ul class="dropdown-menu">
+        <li><a href="index.htm">Home</a></li>
+        <li><a href="user_add.htm">Add User</a></li>
+        <li><a href="restaurant_add.htm">Add Restaurant</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="main-content">
+    <section class="left-side">
+        <h2>Options</h2>
+        <button class="options-btn" onclick="showUsers()">See All Users</button>
+        <button class="options-btn" onclick="showRestaurants()">See All Restaurants</button>
+    </section>
+
+    <section class="right-side" id="data-section">
+        <h2>Data Display</h2>
+        <ul id="data-list">
+            <!-- Database data will be displayed here -->
+        </ul>
+    </section>
+  </div>
+
+  <footer>
+      <div class="footer-links">
+        <a href="#">Support</a>
+        <a href="index.html">Home</a>
+        <a href="#">Terms and settings</a>
+      </div>
+      <div class="footer-info">
+        <p>
+          Coronavirus (COVID-19) FAQs | Manage your trips | Contact Customer
+          Service
+        </p>
+        <p>Privacy & cookies | Terms and conditions | Dispute resolution</p>
+      </div>
+  </footer>
+</body>
+</html>

@@ -1,0 +1,230 @@
+
+:root {
+    --primary-color:  #142a37;  
+    --secondary-color: #EB8317;
+    --third-color: #081014;
+    --text-color: #AD852F;  
+    --text-color-2: #916d21;                  
+    --secondary-background-color: #142a37;  
+    --background-color: #0F1C23; 
+}
+
+body {
+    background-color: var(--background-color) ;
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center; /* Center the form vertically */
+    height: 100vh; /* Take full viewport height */
+    margin: 0;
+}
+
+.mt-5 {
+    width: 1100px;
+    border-radius: 50px;
+    padding: 20px;
+    background-color: var(--primary-color);
+    text-align: center; /* Ensure button and content are centered */
+    transition: box-shadow 0.5s ease;
+}
+
+.mt-5:hover {
+    box-shadow: 0px 0px 20px 1px var(--third-color);
+}
+
+/* #restaurantForm {
+    display: flex;
+    flex-direction: column; 
+    align-items: center; 
+    justify-content: space-between;
+    gap: 20px; 
+} */
+
+
+
+
+
+/*ChatGpt Construction*/
+
+#restaurantForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    width: 100%;
+}
+
+#restaurantForm .form-row {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+#restaurantForm .form-row .left,
+#restaurantForm .form-row .right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 48%; 
+}
+
+#restaurantForm .form-row .mb-3 {
+    width: 100%;
+}
+
+#restaurantForm button {
+    align-self: center;
+    margin-top: 20px;
+}
+
+/*ChatGpt Construction*/
+
+
+
+
+
+.form-control {
+    width: 300px;
+}
+
+.checkbox-container {
+    margin-top: 40px;
+    margin-left: 65px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px; 
+}
+
+.checkbox-container label {
+    font-size: x-large;
+}
+
+#isAdmin {
+    appearance: none; 
+    width: 30px;
+    height: 30px;
+    border-radius: 50%; 
+    background-color: #ffffff;
+    border: 2px solid var(--text-color);
+    cursor: pointer;
+    position: relative;
+}
+
+#isAdmin:checked {
+    background-color: var(--text-color);
+}
+
+#isAdmin:checked::after {
+    content: "✓";
+    color: #ffffff; 
+    font-size: 16px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.checkbox-container .form-label {
+    margin: 0;
+    line-height: 30px; 
+}
+
+.mt-5 h2 {
+    font-size: 45px;
+}
+
+.mb-3 {
+    text-align: left !important;
+    font-size: large;
+}
+
+/*.btn:hover, .btn-primary:hover {
+    color: var(--text-color);
+    border: 3px solid var(--text-color);
+    background-image: none !important;
+  background-color: var(--primary-color) !important;
+}*/
+
+
+.btn, .btn-primary {
+    display: flex; /* Use flexbox for centering */
+    align-items: center; /* Center vertically */
+    justify-content: center; /* Center horizontally */
+    font-size: xx-large;
+    color: var(--primary-color);
+    border-radius: 100px;
+    width: 160px;
+    height: 60px;
+    border: 0px solid var(--text-color); /* Border color */
+    background-image: linear-gradient(to right, var(--text-color-2) 10%, var(--text-color) 90%);
+    outline: none; /* Remove default focus outline */
+    box-shadow: none; /* Remove any default box shadow */
+    transition: none; /* Disable transitions */
+}
+
+
+.btn-secondary {
+    font-size: larger;
+    text-align: center;
+    margin-top: 10px;
+    width: 250px;
+    background-color: none;
+}
+.btn-secondary i{
+    margin-right: 10px;
+}
+
+.btn:hover {
+    color: var(--text-color);
+    border: 3px solid var(--text-color);
+    background-image: none !important;
+    background-color: var(--primary-color) !important;
+}
+
+/* Add this rule to prevent the light blue color */
+.btn:focus, .btn-primary:focus {
+    outline: none; /* Remove the outline */
+    box-shadow: none; /* Remove the default box shadow */
+    border: 3px solid var(--text-color) !important;
+    border: none;
+}
+
+/* Override Bootstrap alert-danger for error messages */
+.alert-danger {
+    background-color: transparent !important; /* Remove background color */
+    color: var(--text-color) !important; /* Change text color to match your theme */
+    border: none !important; /* Remove border */
+    padding: 10px 0px !important; /* Optional: adjust padding */
+}
+
+/* Optional: Style the error message further to your liking */
+#message {
+    font-size: 18px; /* Set custom font size */
+    color: var(--text-color); /* Ensure the color matches your theme */
+    text-align: center; /* Center the message */
+    margin-top: 10px; /* Add some space above the message */
+}
+
+.form-control {
+    width: 100%;
+}
+
+.time-container {
+    display: flex;
+    gap: 20px; /* Space between the two fields */
+    width: 100%;
+}
+
+.time-container .mb-3 {
+    flex: 1; /* Make each time field take up equal space */
+}
+
+/* 
+#restaurantForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    gap: 5px; 
+} */
+
