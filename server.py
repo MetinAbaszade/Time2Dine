@@ -336,23 +336,28 @@ def login():
     cursor = conn.cursor()
 
     try:
-        # Join the Users and Customer tables to retrieve Customer.Id
+        # Join the Users, Customer, and Admin tables to retrieve Customer.Id and check if the user is an admin
         login_query = """
-            SELECT c.Id as customer_Id
+            SELECT c.Id AS customer_Id, 
+                   CASE WHEN a.Id IS NOT NULL THEN 1 ELSE 0 END AS IsAdmin
             FROM users u
-            JOIN customer c ON u.Id = c.UserId
+            LEFT JOIN customer c ON u.Id = c.UserId
+            LEFT JOIN admin a ON u.Id = a.UserId
             WHERE u.Email = %s AND u.Password = %s
         """
         cursor.execute(login_query, (email, password))
-        customer = cursor.fetchone()
+        result = cursor.fetchone()
 
-        if customer:
-            customer_id = customer[0]  # Assuming the first element is customer_Id
+        if result:
+            customer_id = result[0]  # Customer Id
+            is_admin = result[1]     # 1 if admin, 0 otherwise
+
             token = generate_jwt_token(customer_id)
             return jsonify({
                 'message': 'Login successful',
                 'token': token,
-                'customerId': customer_id  # Send customer_Id instead of user_id
+                'customerId': customer_id,  # Send customer_Id instead of user_id
+                'isAdmin': is_admin         # 1 if user is admin, 0 otherwise
             }), 200
         else:
             return jsonify({'error': 'Invalid email or password'}), 401
@@ -655,6 +660,29 @@ def delete_foodspot(foodspot_id):
         return jsonify({'message': 'FoodSpot deleted successfully'}), 200
     except mysql.connector.Error as err:
         conn.rollback()
+        return jsonify({'error': str(err)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/is_admin', methods=['GET'])
+@token_required
+def check_if_admin():
+    # Extract userId from the token
+    user_id = extract_user_id_from_token()
+    
+    # Check if the user is an admin
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        admin_query = "SELECT Id FROM Admin WHERE UserId = %s"
+        cursor.execute(admin_query, (user_id,))
+        is_admin = cursor.fetchone() is not None
+        
+        # Return JSON response with the result
+        return jsonify({'isAdmin': is_admin}), 200
+    except mysql.connector.Error as err:
         return jsonify({'error': str(err)}), 500
     finally:
         cursor.close()
