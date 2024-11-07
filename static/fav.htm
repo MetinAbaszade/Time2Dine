@@ -14,6 +14,7 @@
   </head>
 
   <body>
+    <div class="loader"></div>
     <header>
       <div class="logo">
         <a href="index.htm">Time2Dine</a>
@@ -65,8 +66,32 @@
     </footer>
 
     <script>
-      const token = getcookie("token");
+      window.addEventListener("load", () => {
+        const loader = document.querySelector(".loader");
+        
+        // Function to simulate fetching data from the database
+        async function fetchDataFromDatabase() {
+          // Simulating a delay (e.g., fetching data from database)
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const dataArray = [1, 2, 3, 4, 5]; // Example array from "database"
+              resolve(dataArray);
+            }, 2000); // 2-second delay
+          });
+        }
 
+        // Fetch data and hide loader once it's done
+        fetchDataFromDatabase().then((data) => {
+          console.log("Data received:", data); // Use the data as needed
+          loader.classList.add("loader-hidden");
+
+          loader.addEventListener("transitionend", () => {
+            document.body.removeChild(loader);
+          });
+        });
+      });
+      
+      const token = getcookie("token");
       // Function to debounce input
       function debounce(func, delay) {
         let timeout;

@@ -16,11 +16,7 @@ body {
 
 footer {
     text-align: center;
-    /*position: fixed;
-    bottom: 0;
-    left: 0; */
-    width: 100%;
-    flex: 1;
+    margin-top: auto;
 }
 
 .footer-links a {

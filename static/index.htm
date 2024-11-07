@@ -19,6 +19,38 @@
     <title>Time2Dine</title>
 
     <script>
+      document.getElementById("rating").addEventListener("input", function () {
+      const rating = parseInt(this.value);
+      if (rating < 1) this.value = 1;
+      if (rating > 5) this.value = 5;
+      });
+
+      window.addEventListener("load", () => {
+        const loader = document.querySelector(".loader");
+        
+        // Function to simulate fetching data from the database
+        async function fetchDataFromDatabase() {
+          // Simulating a delay (e.g., fetching data from database)
+          return new Promise((resolve) => {
+            setTimeout(() => {
+              const dataArray = [1, 2, 3, 4, 5]; // Example array from "database"
+              resolve(dataArray);
+            }, 2000); // 2-second delay
+          });
+        }
+
+        // Fetch data and hide loader once it's done
+        fetchDataFromDatabase().then((data) => {
+          console.log("Data received:", data); // Use the data as needed
+          loader.classList.add("loader-hidden");
+
+          loader.addEventListener("transitionend", () => {
+            document.body.removeChild(loader);
+          });
+        });
+      });
+
+
       // Token check
       window.onload = function () {
         const token = getcookie("token");
@@ -183,7 +215,7 @@
         </ul>
       </div>
     </header>
-
+    <div class="loader"></div>
     <section id="search" class="search-section">
       <h1>Search Restaurant & Café</h1>
       <div class="search-box">

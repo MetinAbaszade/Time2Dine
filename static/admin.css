@@ -1,0 +1,91 @@
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+    background-color: var(--background-color);
+    background-size: auto;
+    background-repeat: no-repeat;
+    background-position: top;
+    margin: 0;
+    background-color: var(--primary-color);
+    background-image: none;
+}
+
+header {
+    display: flex;
+    justify-content: space-around;
+    background-color: var(--secondary-background-color); 
+    flex: 0 0 30%;
+    color: var(--text-color);
+    padding: 15px;
+    text-align: center;
+    align-items: center;
+}
+
+footer {
+    padding-top: 0px;
+    padding-bottom: 0px;
+    text-align: center;
+    margin-top: auto;
+}
+
+.footer-links a {
+    color: var(--text-color);
+    margin: 0 10px;
+    text-decoration: none;
+}
+
+.footer-info p {
+    margin: 10px 0;
+    font-size: 0.9em;
+}
+
+/* New Styles for Left and Right Side Sections */
+.main-content {
+    display: flex;
+    flex: 1; /* Allows the main content to expand to available height */
+    width: 100%;
+}
+
+.left-side {
+    width: 30%;
+    background-color: var(--background-color);
+    padding: 20px;
+    border-right: 2px solid var(--text-color);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.right-side {
+    width: 70%;
+    padding: 20px;
+    background-color: #fff;
+}
+
+.left-side h2 {
+    margin-bottom: 20px;
+}
+
+.options-btn {
+    border-radius: 10px;
+    display: block;
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+#data-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#data-list li {
+    padding: 10px;
+    margin: 5px 0;
+    background-color: #e0e0e0;
+    border-radius: 5px;
+}
