@@ -336,28 +336,36 @@ def login():
     cursor = conn.cursor()
 
     try:
-        # Join the Users, Customer, and Admin tables to retrieve Customer.Id and check if the user is an admin
         login_query = """
-            SELECT c.Id AS customer_Id, 
-                   CASE WHEN a.Id IS NOT NULL THEN 1 ELSE 0 END AS IsAdmin
+            SELECT CASE 
+                       WHEN a.Id IS NOT NULL THEN a.Id
+                       WHEN c.Id IS NOT NULL THEN c.Id
+                   END AS id,
+                   CASE 
+                       WHEN a.Id IS NOT NULL THEN 1
+                       ELSE 0
+                   END AS isAdmin
             FROM users u
-            LEFT JOIN customer c ON u.Id = c.UserId
             LEFT JOIN admin a ON u.Id = a.UserId
+            LEFT JOIN customer c ON u.Id = c.UserId
             WHERE u.Email = %s AND u.Password = %s
         """
         cursor.execute(login_query, (email, password))
         result = cursor.fetchone()
 
         if result:
-            customer_id = result[0]  # Customer Id
-            is_admin = result[1]     # 1 if admin, 0 otherwise
+            user_id = result[0] 
+            # 1 if admin, 0 if customer
+            is_admin = result[1]   
 
-            token = generate_jwt_token(customer_id)
+            # Generate JWT token with user_id
+            token = generate_jwt_token(user_id)
+
             return jsonify({
                 'message': 'Login successful',
                 'token': token,
-                'customerId': customer_id,  # Send customer_Id instead of user_id
-                'isAdmin': is_admin         # 1 if user is admin, 0 otherwise
+                'id': user_id,        
+                'isAdmin': is_admin
             }), 200
         else:
             return jsonify({'error': 'Invalid email or password'}), 401
@@ -676,7 +684,7 @@ def check_if_admin():
     cursor = conn.cursor()
     
     try:
-        admin_query = "SELECT Id FROM Admin WHERE UserId = %s"
+        admin_query = "SELECT Id FROM admin WHERE Id = %s"
         cursor.execute(admin_query, (user_id,))
         is_admin = cursor.fetchone() is not None
         
