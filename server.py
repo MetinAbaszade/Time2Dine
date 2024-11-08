@@ -684,7 +684,7 @@ def check_if_admin():
     cursor = conn.cursor()
     
     try:
-        admin_query = "SELECT Id FROM Admin WHERE UserId = %s"
+        admin_query = "SELECT Id FROM admin WHERE UserId = %s"
         cursor.execute(admin_query, (user_id,))
         is_admin = cursor.fetchone() is not None
         
