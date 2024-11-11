@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/admin.css">
+    <link rel="stylesheet" href="/static/utils.js">
     <title>Admin</title>
 </head>
 <body>
@@ -39,6 +44,7 @@
         </ul>
     </section>
   </div>
+  <div>Lorem ipsum dolor sit.</div>
 
   <footer>
       <div class="footer-links">
@@ -54,5 +60,175 @@
         <p>Privacy & cookies | Terms and conditions | Dispute resolution</p>
       </div>
   </footer>
+  <script>
+    function getcookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+    } 
+
+    window.onload = async function () {
+        const token = getcookie("token");
+        if (!token) {
+            // Redirect to login page immediately if token is missing
+            window.location.href = "login.htm";
+        } else {
+            const isAdmin = await checkUserRole();
+            if (isAdmin == 0) {
+            // If the user is an admin, redirect to admin page
+            window.location.href = "index.htm";
+          } else {
+            // If the user is not an admin, fetch food spots
+            document.body.style.display = "block";
+          }
+        }
+    };
+
+    async function checkUserRole(query = "") {
+      try {
+        
+        const token = getcookie("token");
+        const response = await fetch(`http://5.75.182.107:8024/is_admin?q=${query}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const userData = await response.json();
+        console.log(userData.isAdmin);
+        // Return 1 if the user is an admin, otherwise 0
+        return userData.isAdmin ? 1 : 0;
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+        return 0; // Default to 0 if there's an error
+      }
+    }
+
+    async function showUsers(query = "") {
+      const token = getcookie("token");
+      const dataList = document.getElementById('data-list');
+      dataList.innerHTML = '<li>Loading...</li>';  // Show loading indicator
+      try {
+        // Send a GET request to fetch all users with authorization
+        const response = await fetch(`http://5.75.182.107:8024/get_all_users?q=${query}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+          const users = await response.json();
+
+          // Clear the previous data
+          dataList.innerHTML = '';
+
+          // Append each user as a list item
+          users.forEach(user => {
+            // Create the list item
+            const listItem = document.createElement('li');
+            listItem.textContent = `${user.FirstName} ${user.LastName} (${user.Role}) - ${user.Email}, Phone: ${user.PhoneNumber}`;
+            
+            // Create the icons container (to group the icons and checkbox together)
+            const iconsContainer = document.createElement('div');
+            iconsContainer.style.display = 'inline-flex'; // Optional, to display icons inline
+            
+            // Create the trash icon
+            const trashIcon = document.createElement('i');
+            trashIcon.classList.add('fa-solid', 'fa-trash');
+            trashIcon.style.marginRight = '10px'; // Optional, to add spacing between icons
+            
+            // Create the pen icon
+            const penIcon = document.createElement('i');
+            penIcon.classList.add('fa-solid', 'fa-pen');
+            penIcon.style.marginRight = '10px'; // Optional, to add spacing between icons
+            
+            // Create the checkbox for "is admin"
+            const isAdminCheckbox = document.createElement('input');
+            isAdminCheckbox.type = 'checkbox';
+            isAdminCheckbox.checked = user.Role === 'Admin'; // Check the box if the user is an admin
+            
+            // Append the icons and checkbox to the icons container
+            iconsContainer.appendChild(trashIcon);
+            iconsContainer.appendChild(penIcon);
+            iconsContainer.appendChild(isAdminCheckbox);
+            
+            // Append the icons container to the list item
+            listItem.appendChild(iconsContainer);
+
+            // Append the list item to the data list
+            dataList.appendChild(listItem);
+          });
+
+      } catch (error) {
+          dataList.innerHTML = `<li>Error: ${error.message}</li>`;
+      }
+    }
+
+    async function showRestaurants() {
+      const token = getcookie("token");
+      const dataList = document.getElementById('data-list');
+      dataList.innerHTML = '<li>Loading...</li>';  // Show loading indicator
+      try {
+        const response = await fetch(`http://5.75.182.107:8024/get_foodspots`, {
+          method: "GET",
+          headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          },
+        });
+
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+          const restaurant = await response.json();
+
+          // Clear the previous data
+          dataList.innerHTML = '';
+
+          restaurant.forEach(restaurant => {
+            // Create the list item
+            const listItem = document.createElement('li');
+            listItem.textContent = `${restaurant.Name} | ${restaurant.ImageUrl} | ${restaurant.Rating} | - ${restaurant.FoodSpotType}`;
+            
+            // Create the icons container (to group the icons and checkbox together)
+            const iconsContainer = document.createElement('div');
+            iconsContainer.style.display = 'inline-flex'; // Optional, to display icons inline
+            
+            // Create the trash icon
+            const trashIcon = document.createElement('i');
+            trashIcon.classList.add('fa-solid', 'fa-trash');
+            trashIcon.style.marginRight = '10px'; // Optional, to add spacing between icons
+            
+            // Create the pen icon
+            const penIcon = document.createElement('i');
+            penIcon.classList.add('fa-solid', 'fa-pen');
+            penIcon.style.marginRight = '10px'; // Optional, to add spacing between icons
+                        
+            // Append the icons and checkbox to the icons container
+            iconsContainer.appendChild(trashIcon);
+            iconsContainer.appendChild(penIcon);
+            
+            // Append the icons container to the list item
+            listItem.appendChild(iconsContainer);
+
+            // Append the list item to the data list
+            dataList.appendChild(listItem);
+          });
+
+
+      } catch (error) {
+          dataList.innerHTML = `<li>Error: ${error.message}</li>`;
+      }
+    }
+
+  </script>
+
 </body>
 </html>
