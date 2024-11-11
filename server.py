@@ -1,15 +1,17 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, send_file
 from flask_cors import CORS 
 import mysql.connector, datetime
 from sshtunnel import SSHTunnelForwarder
 import jwt, datetime
 from functools import wraps
-
+import re
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
  # JWT secret key
 SECRET_KEY = 'QABIL TURKOQLU' 
+ERROR_LOG_FILE_PATH = '/var/log/apache2/error.log'
+ACCESS_LOG_FILE_PATH = '/var/log/apache2/access.log'
 
 # # Set up SSH tunnel with a different local bind port
 # tunnel = SSHTunnelForwarder(
@@ -32,6 +34,33 @@ db_config = {
     #'port': tunnel.local_bind_port, 
     'connection_timeout': 10  
 }
+
+def parse_error_log(file_path):
+    log_entries = []
+    error_log_pattern = re.compile(
+        r'\[(?P<date>.+?)\] \[(?P<module>.+?):(?P<level>.+?)\] \[pid (?P<pid>\d+)\] \[client (?P<client>.+?):(?P<port>\d+)\] (?P<message>.+)'
+    )
+    with open(file_path, 'r') as file:
+        for line in file:
+            match = error_log_pattern.match(line)
+            if match:
+                log_entries.append(match.groupdict())
+    return log_entries
+
+def parse_access_log(file_path):
+    log_entries = []
+    access_log_pattern = re.compile(
+        r'(?P<ip>[\d\.]+) - - \[(?P<timestamp>[^\]]+)\] '
+        r'"(?P<method>[A-Z]+) (?P<path>[^\s]+) (?P<protocol>HTTP/[\d\.]+)" '
+        r'(?P<status>\d{3}) (?P<bytes>\d+) "(?P<referrer>[^"]*)" "(?P<user_agent>[^"]*)"'
+    )
+    with open(file_path, 'r') as file:
+        for line in file:
+            match = access_log_pattern.match(line)
+            if match:
+                log_entries.append(match.groupdict())
+    return log_entries
+
 
 @app.route('/')
 def root():
@@ -76,7 +105,6 @@ def serve_fav():
 @app.route('/imprint.htm')
 def serve_imprint():
     return send_from_directory('static', 'imprint.htm')
-
 
 def extract_user_id_from_token():
     token = request.headers.get('Authorization')
@@ -695,6 +723,44 @@ def check_if_admin():
     finally:
         cursor.close()
         conn.close()
+
+@app.route('/logs/error', methods=['GET'])
+def get_parsed_error_log():
+    try:
+        parsed_logs = parse_error_log(ERROR_LOG_FILE_PATH)
+        return jsonify(parsed_logs), 200
+    except FileNotFoundError:
+        return jsonify({'error': f'Log file not found: {ERROR_LOG_FILE_PATH}'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/logs/error/download', methods=['GET'])
+def download_error_log():
+    try:
+        return send_file(ERROR_LOG_FILE_PATH, as_attachment=True)
+    except FileNotFoundError:
+        return jsonify({'error': f'Log file not found: {ERROR_LOG_FILE_PATH}'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/logs/access', methods=['GET'])
+def get_parsed_access_log():
+    try:
+        parsed_logs = parse_access_log(ACCESS_LOG_FILE_PATH)
+        return jsonify(parsed_logs), 200
+    except FileNotFoundError:
+        return jsonify({'error': 'Access log file not found.'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/logs/access/download', methods=['GET'])
+def download_access_log():
+    try:
+        return send_file(ACCESS_LOG_FILE_PATH, as_attachment=True)
+    except FileNotFoundError:
+        return jsonify({'error': 'Access log file not found.'}), 404
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8024, debug=True)
