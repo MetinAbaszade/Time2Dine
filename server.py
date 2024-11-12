@@ -38,13 +38,16 @@ db_config = {
 def parse_error_log(file_path):
     log_entries = []
     error_log_pattern = re.compile(
-        r'\[(?P<date>.+?)\] \[(?P<module>.+?):(?P<level>.+?)\] \[pid (?P<pid>\d+)\] \[client (?P<client>.+?):(?P<port>\d+)\] (?P<message>.+)'
+        r'\[(?P<date>.+?)\] \[(?P<module>.+?):(?P<level>.+?)\](?: \[pid (?P<pid>\d+)\])? (?P<message>.+)'
     )
     with open(file_path, 'r') as file:
         for line in file:
             match = error_log_pattern.match(line)
             if match:
-                log_entries.append(match.groupdict())
+                entry = match.groupdict()
+                # Remove keys with None values (like pid for notice logs)
+                entry = {k: v for k, v in entry.items() if v is not None}
+                log_entries.append(entry)
     return log_entries
 
 def parse_access_log(file_path):
