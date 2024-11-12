@@ -19,11 +19,29 @@
     <title>Time2Dine</title>
 
     <script>
-      // document.getElementById("rating").addEventListener("input", function () {
-      // const rating = parseInt(this.value);
-      // if (rating < 1) this.value = 1;
-      // if (rating > 5) this.value = 5;
-      // });
+
+document.addEventListener("DOMContentLoaded", () => {
+  const logoutButton = document.getElementById("logoutButton");
+  if (logoutButton) {
+    logoutButton.addEventListener("click", () => {
+      // Clear the token cookie by setting its expiration date to the past
+      // Try different paths to ensure it’s removed correctly
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/static;";
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=127.0.0.1;";
+      document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/static; domain=127.0.0.1;";
+
+      // Redirect to login page
+      window.location.href = "login.htm";
+    });
+  } else {
+    console.warn("Logout button not found in the DOM.");
+  }
+});
+
+
+
+
 
       window.addEventListener("load", () => {
         const loader = document.querySelector(".loader");
@@ -230,20 +248,29 @@
       <div class="logo">
         <a href="index.htm"> Time2Dine </a>
       </div>
-
-      <div class="navbar">
-        <div class="menu-button">
-          <a href="#">Menu</a>
+      <div class="right-side2">
+        <div class=""></div>
+        <div class="home">
+          <a href="#">Home</a>
         </div>
-        <ul class="dropdown-menu">
-          <li><a href="#">Home</a></li>
-          <li><a href="login.htm">Log In</a></li>
-          <li><a href="register.htm">Register</a></li>
-          <li><a href="fav.htm">Favorites</a></li>
-          <li><a href="#search">Search</a></li>
-          <li><a href="#restaurants">Restaurants</a></li>
-          <li><a href="#restaurants">Add to Fav</a></li>
-        </ul>
+        <div class="fav">
+          <a href="fav.htm">Favorites</a>
+        </div>
+        <div class="navbar">
+          <div class="menu-button">
+            <a href="#">Menu</a>
+          </div>
+          <ul class="dropdown-menu">
+            <!-- <li><a href="#">Home</a></li> -->
+            <li><a href="login.htm">Log In</a></li>
+            <li><a id="logoutButton">Log Out</a></li>
+            <li><a href="register.htm">Register</a></li>
+            <!-- <li><a href="fav.htm">Favorites</a></li> -->
+            <!-- <li><a href="#search">Search</a></li> -->
+            <!-- <li><a href="#restaurants">Restaurants</a></li> -->
+            <!-- <li><a href="#restaurants">Add to Fav</a></li> -->
+          </ul>
+        </div>
       </div>
     </header>
     <div class="loader"></div>
