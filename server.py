@@ -191,6 +191,42 @@ def get_all_users():
         cursor.close()
         conn.close()
 
+@app.route('/get_user_details/<user_id>', methods=['GET'])
+@token_required
+def get_user_details(user_id):
+    user_id = extract_user_id_from_token()
+    
+    # Check if the user is an admin
+    if not is_admin(user_id):
+        return jsonify({'error': 'Unauthorized. Only admins can add users.'}), 403
+    
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        query = """
+            SELECT u.Id AS UserId, u.FirstName, u.LastName, u.Email, u.DateOfBirth, u.PhoneNumber,
+                   CASE 
+                       WHEN a.Id IS NOT NULL THEN 1
+                       ELSE 0
+                   END AS isAdmin
+            FROM users u
+            LEFT JOIN admin a ON u.Id = a.UserId
+            WHERE u.Id = %s
+        """
+        cursor.execute(query, (user_id,))
+        user_details = cursor.fetchone()
+
+        if not user_details:
+            return jsonify({'error': 'User not found'}), 404
+
+        return jsonify(user_details), 200
+    except mysql.connector.Error as err:
+        return jsonify({'error': str(err)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 @app.route('/add_user', methods=['POST'])
 @token_required
 def add_user():
