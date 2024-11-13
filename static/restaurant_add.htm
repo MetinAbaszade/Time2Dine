@@ -6,6 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
     <link rel="stylesheet" href="/static/resadd.css">
+    <link rel="stylesheet" href="/static/utils.js">
     <title>Add Restaurant</title>
 </head>
 <body>
@@ -13,48 +14,6 @@
     <div class="form-container">
         <h2 class="mb-4 text-center">Add Restaurant</h2>
 
-        <!-- <form id="restaurantForm">
-            <div class="left">
-                <div class="mb-3">
-                    <label for="restaurantName" class="form-label">Restaurant Name</label>
-                    <input type="text" class="form-control" id="restaurantName" required>
-                </div>
-    
-                <div class="mb-3">
-                    <label for="address" class="form-label">Address</label>
-                    <input type="text" class="form-control" id="address" required>
-                </div>
-    
-                <div class="mb-3">
-                    <label for="rating" class="form-label">Rating</label>
-                    <input type="number" class="form-control" id="rating" min="1" max="5" step="0.1" required>
-                </div>
-
-            </div>
-            <div class="right">
-                <div class="mb-3">
-                    <label for="imageUrl" class="form-label">Image URL</label>
-                    <input type="url" class="form-control" id="imageUrl" required>
-                </div>
-    
-                <div class="mb-3">
-                    <label for="phoneNumber" class="form-label">Phone Number</label>
-                    <input type="text" class="form-control" id="phoneNumber" required>
-                </div>
-    
-                <div class="mb-3">
-                    <label for="openingTime" class="form-label">Opening Time</label>
-                    <input type="time" class="form-control" id="openingTime" required>
-                </div>
-    
-                <div class="mb-3">
-                    <label for="closingTime" class="form-label">Closing Time</label>
-                    <input type="time" class="form-control" id="closingTime" required>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-primary">Add</button>
-        </form> -->
 
         <form id="restaurantForm">
             <div class="form-row">
@@ -122,32 +81,39 @@
 </div>
 
 <script>
-    document.getElementById("rating").addEventListener("input", function () {
-    const rating = parseInt(this.value);
-    if (rating < 1) this.value = 1;
-    if (rating > 5) this.value = 5;
-    });
+    function getcookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+    }
 
+    document.getElementById("rating").addEventListener("input", function () {
+        const rating = parseInt(this.value);
+        if (rating < 1) this.value = 1;
+        if (rating > 5) this.value = 5;
+    });
     document.getElementById('restaurantForm').addEventListener('submit', async function(event) {
         event.preventDefault();
-
+        console.log(document.getElementById('restaurantName'));
         const restaurantData = {
-            restaurantName: document.getElementById('restaurantName').value,
+            name: document.getElementById('restaurantName').value,
             address: document.getElementById('address').value,
-            rating: document.getElementById('rating').value,
+            rating: parseInt(document.getElementById('rating').value),
             imageUrl: document.getElementById('imageUrl').value,
             phoneNumber: document.getElementById('phoneNumber').value,
             openingTime: document.getElementById('openingTime').value,
             closingTime: document.getElementById('closingTime').value
         };
-
         try {
-            const response = await fetch(`http://5.75.182.107:8024/get_foodspots?q=${query}`, {
-                method: 'POST',
+            const token = getcookie("token");
+            console.log(token);
+            const response = await fetch(`http://5.75.182.107:8024/add_foodspot`, {
+                method: 'POST',  // Using POST for adding a new food spot
                 headers: {
+                    'Authorization': `Bearer ${token}`,  // Adding the token in the Authorization header
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(restaurantData)
+                body: JSON.stringify(restaurantData),
             });
 
             const result = await response.json();
@@ -155,7 +121,7 @@
             messageElement.innerHTML = '';
 
             if (response.ok) {
-                messageElement.innerHTML = `<div class="alert alert-success">Restaurant added successfully!</div>`;
+                messageElement.innerHTML = `<div class="alert alert-success">Food spot added successfully!</div>`;
             } else {
                 messageElement.innerHTML = `<div class="alert alert-danger">Error: ${result.error}</div>`;
             }
@@ -164,6 +130,7 @@
         }
     });
 </script>
+
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>

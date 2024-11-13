@@ -240,27 +240,38 @@ footer {
 /* Header styling */
 header {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-around; /* Adjust spacing for left and right sides */
     align-items: center;
     padding: 15px 30px;
     background-color: var(--secondary-background-color); 
     color: var(--text-color);
 }
 
+
 /* .menu-button{
     margin-right: 10px;
 } */
 
+.right-side2 {
+    display: flex; /* Set to flex to align items horizontally */
+    gap: 15px; /* Space between items */
+}
+/* 
+.right-side div a{
+  
+} */
+
 /* Menu button styling */
-.menu-button a {
+.right-side2 a {
     text-decoration: none;
     color: var(--text-color);
-    font-size: 1.5em;
+    font-size: 1.3em;
     font-weight: bold;
-    padding: 8px 16px;
+    padding: 10px 20px;
     background-color: var(--primary-color); 
     border-radius: 30px;
     transition: background-color 0.3s ease;
+    margin-left: 10px; 
 }
 
 .menu-button a:hover {
@@ -269,6 +280,7 @@ header {
 }
 
 .dropdown-menu {
+    text-align: center;
     list-style: none; /* Remove list bullets */
     position: absolute; /* Take the menu out of document flow */
     display: none; /* Hidden by default */
@@ -280,6 +292,7 @@ header {
 }
 
 .dropdown-menu li {
+    text-align: center;
     margin-bottom: 5px;
 }
 
