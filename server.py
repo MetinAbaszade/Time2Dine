@@ -216,7 +216,7 @@ def get_user_details(user_id):
         """
         cursor.execute(query, (user_id,))
         user_details = cursor.fetchone()
-        print(user_details)
+        print(query)
 
         if not user_details:
             return jsonify({'error': 'User not found'}), 404
