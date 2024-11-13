@@ -150,7 +150,7 @@ def is_admin(user_id):
     cursor = conn.cursor()
     try:
         # Check if the user has an admin role
-        admin_query = "SELECT Id FROM Admin WHERE UserId = %s"
+        admin_query = "SELECT Id FROM admin WHERE UserId = %s"
         cursor.execute(admin_query, (user_id,))
         is_admin = cursor.fetchone() is not None
         return is_admin
@@ -321,9 +321,9 @@ def delete_user(user_id_to_delete):
                        WHEN c.Id IS NOT NULL THEN 'Customer'
                        ELSE 'Unknown'
                    END AS Role
-            FROM Users u
-            LEFT JOIN Admin a ON u.Id = a.UserId
-            LEFT JOIN Customer c ON u.Id = c.UserId
+            FROM users u
+            LEFT JOIN admin a ON u.Id = a.UserId
+            LEFT JOIN customer c ON u.Id = c.UserId
             WHERE u.Id = %s
         """
         cursor.execute(user_check_query, (user_id_to_delete,))
@@ -335,16 +335,16 @@ def delete_user(user_id_to_delete):
         # Determine if the user is an admin or customer and delete from the appropriate table
         role = user[1]
         if role == 'Admin':
-            delete_admin_query = "DELETE FROM Admin WHERE UserId = %s"
+            delete_admin_query = "DELETE FROM admin WHERE UserId = %s"
             cursor.execute(delete_admin_query, (user_id_to_delete,))
         elif role == 'Customer':
-            delete_customer_query = "DELETE FROM Customer WHERE UserId = %s"
+            delete_customer_query = "DELETE FROM customer WHERE UserId = %s"
             cursor.execute(delete_customer_query, (user_id_to_delete,))
         else:
             return jsonify({'error': 'User role not recognized; unable to delete.'}), 400
 
         # Finally, delete the user from the Users table
-        delete_user_query = "DELETE FROM Users WHERE Id = %s"
+        delete_user_query = "DELETE FROM users WHERE Id = %s"
         cursor.execute(delete_user_query, (user_id_to_delete,))
 
         conn.commit()
@@ -602,7 +602,7 @@ def add_foodspot():
     try:
         # Insert into FoodSpot table
         foodspot_query = """
-            INSERT INTO FoodSpot (AdminId, Name, Address, ImageUrl, PhoneNumber, OpeningTime, ClosingTime, Rating)
+            INSERT INTO foodspot (AdminId, Name, Address, ImageUrl, PhoneNumber, OpeningTime, ClosingTime, Rating)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(foodspot_query, (admin_id, name, address, image_url, phone_number, opening_time, closing_time, rating))
@@ -639,7 +639,7 @@ def update_foodspot(foodspot_id):
 
     try:
         # Build update query dynamically based on provided fields
-        update_query = "UPDATE FoodSpot SET "
+        update_query = "UPDATE foodspot SET "
         fields = []
         values = []
 
@@ -692,7 +692,7 @@ def delete_foodspot(foodspot_id):
     cursor = conn.cursor()
 
     try:
-        delete_query = "DELETE FROM FoodSpot WHERE Id = %s"
+        delete_query = "DELETE FROM foodspot WHERE Id = %s"
         cursor.execute(delete_query, (foodspot_id,))
         conn.commit()
 
