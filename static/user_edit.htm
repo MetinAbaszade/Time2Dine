@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
+    <link rel="stylesheet" href="/static/resadd.css">
+    <title>Add Restaurant</title>
+</head>
+<body>
+<div class="container mt-5">
+    <div class="form-container">
+        <h2 class="mb-4 text-center">Edit User</h2>
+
+        <form id="restaurantForm">
+            <div class="form-row">
+                <div class="left">
+                    <!-- First Name -->
+                    <div class="mb-3">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" required>
+                    </div>
+                    <!-- Last Name -->
+                    <div class="mb-3">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" required>
+                    </div>
+                    <!-- Phone Number -->
+                    <div class="mb-3">
+                        <label for="phoneNumber" class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" id="phoneNumber" required>
+                    </div>
+                         
+                </div>
+                <div class="right">
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" required>
+                    </div>
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" class="form-control" id="password" required>
+                    </div>
+                    <!-- Opening Time -->
+                    <div class="time-container">
+                        <!-- Date of Birth -->
+                        <div class="mb-3">
+                            <label for="dateofbirth" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" id="dateofbirth" required>
+                        </div>
+                    
+                        <!-- IsAdmin -->
+                        <div class="mb-3 checkbox-container">
+                            <input type="checkbox" id="isAdmin">
+                            <label for="isAdmin" class="form-label">Admin</label>
+                        </div>
+                        
+                        
+                    </div>
+                    
+                </div>
+            </div>
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary">Edit</button>
+        </form>
+        
+        
+        <!-- Message Display -->
+        <div class="mt-3" id="message"></div>
+
+        <div class="mt-3 text-center">
+            <p><a href="admin.htm" class="btn btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i>
+                Back to Admin Page
+            </a></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to get the token from cookies
+    function getcookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(";").shift();
+    }
+
+    // Function to get URL parameters
+    function getUrlParameter(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
+
+    // Function to fetch and display restaurant data
+    async function fetchUserData() {
+        const userId = getUrlParameter('user_id');
+        if (!userId) {
+            alert("User spot ID is missing.");
+            return;
+        }
+        // console.log(userId);
+
+        const token = getcookie("token");
+        try {
+            const response = await fetch(`http://5.75.182.107:8024/get_user/${userId}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) throw new Error("Network response was not ok");
+
+            const user = await response.json();
+            if (user) {
+                // Populate the form with the restaurant data
+                document.getElementById("firstName").value = user.firstName;
+                document.getElementById("lastName").value = user.lastName;
+                document.getElementById("phoneNumber").value = user.phoneNumber;
+                document.getElementById("email").value = user.email;
+                document.getElementById("password").value = user.password;
+                document.getElementById("dateOfBirth").value = user.dateOfBirth;
+                document.getElementById("isAdmin").value = user.isAdmin;
+            } else {
+                alert("Restaurant not found.");
+            }
+        } catch (error) {
+            alert(`Error fetching restaurant data: ${error.message}`);
+        }
+    }
+
+    // Fetch restaurant data when the page loads
+    window.onload = fetchUserData;
+    document.getElementById('restaurantForm').addEventListener('submit', async function(event) {
+    event.preventDefault();
+
+        const userId = getUrlParameter('user_id');
+        const userData = {
+            firstName: document.getElementById('firstName').value, // Adjusted ID
+            lastName: document.getElementById('lastName').value,         // Adjusted ID
+            phoneNumber: document.getElementById('phoneNumber').value,
+            email: document.getElementById('email').value,            // Adjusted ID
+            password: document.getElementById('password').value,     // Adjusted ID
+            dateOfBirth: document.getElementById('dateofbirth').value,  // Adjusted ID
+            isAdmin: document.getElementById('isAdmin').checked         // Checkbox
+        };
+
+        const token = getcookie("token");
+
+        try {
+            const response = await fetch(`http://5.75.182.107:8024/update_user/${userId}`, {
+                method: "PUT",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(restaurantData),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+                window.location.href = "admin.htm"
+                // Optionally redirect or update UI
+            } else {
+                alert(`Error: ${result.error}`);
+            }
+        } catch (error) {
+            alert(`Error updating restaurant: ${error.message}`);
+        }
+    });
+
+
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

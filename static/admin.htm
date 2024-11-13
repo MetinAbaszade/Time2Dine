@@ -15,7 +15,7 @@
 <body>
   <header>
     <div class="logo">
-      <a href="login.htm"> Time2Dine </a>
+      <a href="#"> Time2Dine </a>
     </div>
     <div class="right-side2">
       <div class="fav">
@@ -23,6 +23,9 @@
       </div>
       <div class="home">
         <a href="restaurant_add.htm">Add Restaurant</a>
+      </div>
+      <div style="cursor: pointer;" class="logout">
+        <a id="logoutButton">Log Out</a>
       </div>
   </header>
 
@@ -57,6 +60,25 @@
       </div>
   </footer>
   <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const logoutButton = document.getElementById("logoutButton");
+      if (logoutButton) {
+        logoutButton.addEventListener("click", () => {
+          // Clear the token cookie by setting its expiration date to the past
+          // Try different paths to ensure it’s removed correctly
+          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/static;";
+          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=127.0.0.1;";
+          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/static; domain=127.0.0.1;";
+
+          // Redirect to login page
+          window.location.href = "login.htm";
+        });
+      } else {
+        console.warn("Logout button not found in the DOM.");
+      }
+    });
+
     function getcookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
@@ -74,6 +96,7 @@
             // If the user is an admin, redirect to admin page
             window.location.href = "index.htm";
           } else {
+            showUsers();
             // If the user is not an admin, fetch food spots
             document.body.style.display = "block";
           }
@@ -145,6 +168,12 @@
             penIcon.classList.add('fa-solid', 'fa-pen');
             penIcon.style.marginRight = '20px'; // Optional, to add spacing between icons
             
+            const link = document.createElement('a');
+            link.href = `user_edit.htm?user_id=${user.UserId}`;  // Pass FoodSpotId as a URL parameter
+            link.appendChild(penIcon);
+            link.style.color = "black";
+
+          
             // Create the checkbox for "is admin"
             const isAdminCheckbox = document.createElement('input');
             isAdminCheckbox.type = 'checkbox';
@@ -152,7 +181,7 @@
             
             // Append the icons and checkbox to the icons container
             iconsContainer.appendChild(trashIcon);
-            iconsContainer.appendChild(penIcon);
+            iconsContainer.appendChild(link);
             iconsContainer.appendChild(isAdminCheckbox);
             
             // Append the icons container to the list item
@@ -209,13 +238,21 @@
 
         const penIcon = document.createElement("i");
         penIcon.classList.add("fa-solid", "fa-pen");
-        penIcon.style.marginRight = "10px";
+        penIcon.style.marginRight = "20px";
+
+        const link = document.createElement('a');
+        link.href = `restaurant_edit.htm?foodspot_id=${restaurant.FoodSpotId}`;  // Pass FoodSpotId as a URL parameter
+        link.appendChild(penIcon);
+        link.style.color = "black";
+
+        // document.getElementById('data-list').appendChild(link);
+
 
         listItem.appendChild(image);
         listItem.appendChild(textContent);
 
         iconsContainer.appendChild(trashIcon);
-        iconsContainer.appendChild(penIcon);
+        iconsContainer.appendChild(link);
 
         listItem.appendChild(iconsContainer);
         dataList.appendChild(listItem);
