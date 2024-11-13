@@ -12,8 +12,7 @@
 <body>
 <div class="container mt-5">
     <div class="form-container">
-        <h2 class="mb-4 text-center">Add Restaurant</h2>
-
+        <h2 class="mb-4 text-center">Edit Restaurant</h2>
 
         <form id="restaurantForm">
             <div class="form-row">
@@ -21,52 +20,48 @@
                     <!-- Restaurant Name -->
                     <div class="mb-3">
                         <label for="restaurantName" class="form-label">Restaurant Name</label>
-                        <input type="text" class="form-control" id="restaurantName" required>
+                        <input type="text" class="form-control" id="restaurantName" name="name" placeholder="Enter restaurant name" required>
                     </div>
                     <!-- Restaurant Address -->
                     <div class="mb-3">
                         <label for="address" class="form-label">Address</label>
-                        <input type="text" class="form-control" id="address" required>
+                        <input type="text" class="form-control" id="address" name="address" placeholder="Enter address" required>
                     </div>
                     <!-- Rating -->
                     <div class="mb-3">
                         <label for="rating" class="form-label">Rating</label>
-                        <input type="number" class="form-control" id="rating" min="1" max="5" required>
+                        <input type="number" class="form-control" id="rating" name="rating" placeholder="1-5" min="1" max="5" required>
                     </div>
-                    
                 </div>
                 <div class="right">
                     <!-- Image URL -->
                     <div class="mb-3">
                         <label for="imageUrl" class="form-label">Image URL</label>
-                        <input type="url" class="form-control" id="imageUrl" required>
+                        <input type="url" class="form-control" id="imageUrl" name="imageUrl" placeholder="Enter image URL" required>
                     </div>
                     <!-- Phone Number -->
                     <div class="mb-3">
                         <label for="phoneNumber" class="form-label">Phone Number</label>
-                        <input type="text" class="form-control" id="phoneNumber" required>
+                        <input type="tel" class="form-control" id="phoneNumber" name="phone" placeholder="Enter phone number" required>
                     </div>
-                    <!-- Opening Time -->
+                    <!-- Time Container -->
                     <div class="time-container">
                         <!-- Opening Time -->
                         <div class="mb-3">
                             <label for="openingTime" class="form-label">Opening Time</label>
-                            <input type="time" class="form-control" id="openingTime" required>
+                            <input type="time" class="form-control" id="openingTime" name="openingTime" required>
                         </div>
-                    
                         <!-- Closing Time -->
                         <div class="mb-3">
                             <label for="closingTime" class="form-label">Closing Time</label>
-                            <input type="time" class="form-control" id="closingTime" required>
+                            <input type="time" class="form-control" id="closingTime" name="closingTime" required>
                         </div>
                     </div>
-                    
                 </div>
             </div>
             <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary">Add</button>
+            <button type="submit" class="btn btn-primary">Edit</button>
         </form>
-        
         
         <!-- Message Display -->
         <div class="mt-3" id="message"></div>
@@ -80,22 +75,65 @@
     </div>
 </div>
 
+
 <script>
+    // Function to get the token from cookies
     function getcookie(name) {
         const value = `; ${document.cookie}`;
         const parts = value.split(`; ${name}=`);
         if (parts.length === 2) return parts.pop().split(";").shift();
     }
 
-    document.getElementById("rating").addEventListener("input", function () {
-        const rating = parseInt(this.value);
-        if (rating < 1) this.value = 1;
-        if (rating > 5) this.value = 5;
-    });
+    // Function to get URL parameters
+    function getUrlParameter(name) {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get(name);
+    }
 
+    // Function to fetch and display restaurant data
+    async function fetchRestaurantData() {
+        const foodspotId = getUrlParameter('foodspot_id');
+        if (!foodspotId) {
+            alert("Food spot ID is missing.");
+            return;
+        }
+
+        const token = getcookie("token");
+        try {
+            const response = await fetch(`http://5.75.182.107:8024/get_foodspot/${foodspotId}`, {
+                method: "GET",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
+                },
+            });
+
+            if (!response.ok) throw new Error("Network response was not ok");
+
+            const restaurant = await response.json();
+            if (restaurant) {
+                // Populate the form with the restaurant data
+                document.getElementById("restaurantName").value = restaurant.Name;
+                document.getElementById("address").value = restaurant.Address;
+                document.getElementById("rating").value = restaurant.Rating;
+                document.getElementById("imageUrl").value = restaurant.ImageUrl;
+                document.getElementById("phoneNumber").value = restaurant.PhoneNumber;
+                document.getElementById("openingTime").value = restaurant.OpeningTime;
+                document.getElementById("closingTime").value = restaurant.ClosingTime;
+            } else {
+                alert("Restaurant not found.");
+            }
+        } catch (error) {
+            alert(`Error fetching restaurant data: ${error.message}`);
+        }
+    }
+
+    // Fetch restaurant data when the page loads
+    window.onload = fetchRestaurantData;
     document.getElementById('restaurantForm').addEventListener('submit', async function(event) {
-        event.preventDefault();
-        
+    event.preventDefault();
+
+        const foodspotId = getUrlParameter('foodspot_id');
         const restaurantData = {
             name: document.getElementById('restaurantName').value,
             address: document.getElementById('address').value,
@@ -106,36 +144,33 @@
             closingTime: document.getElementById('closingTime').value
         };
 
+        const token = getcookie("token");
+
         try {
-            const token = getcookie("token");
-            const response = await fetch(`http://5.75.182.107:8024/add_foodspot`, {
-                method: 'POST',
+            const response = await fetch(`http://5.75.182.107:8024/update_foodspot/${foodspotId}`, {
+                method: "PUT",
                 headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify(restaurantData),
             });
 
             const result = await response.json();
-            const messageElement = document.getElementById('message');
-            messageElement.innerHTML = '';
 
             if (response.ok) {
-                messageElement.innerHTML = `<div class="alert alert-success">Food spot added successfully!</div>`;
-                
-                // Clear form inputs after successful addition
-                document.getElementById('restaurantForm').reset();
+                window.location.href = "admin.htm"
+                // Optionally redirect or update UI
             } else {
-                messageElement.innerHTML = `<div class="alert alert-danger">Error: ${result.error}</div>`;
+                alert(`Error: ${result.error}`);
             }
         } catch (error) {
-            document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
+            alert(`Error updating restaurant: ${error.message}`);
         }
     });
+
+
 </script>
-
-
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
