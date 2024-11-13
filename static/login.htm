@@ -107,9 +107,9 @@
 
                 // Redirect based on admin status
                 if (result.isAdmin == 1) {
-                    window.location.replace("admin.htm");  // `replace` prevents back-navigation to this page
+                    window.location.href = "admin.htm";  // `replace` prevents back-navigation to this page
                 } else {
-                    window.location.replace("index.htm");
+                    window.location.href = "index.htm";
                 }
             }
         } catch (error) {
