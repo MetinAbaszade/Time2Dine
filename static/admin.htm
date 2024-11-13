@@ -95,7 +95,6 @@
         if (!response.ok) throw new Error('Network response was not ok');
         
         const userData = await response.json();
-        console.log(userData.isAdmin);
         // Return 1 if the user is an admin, otherwise 0
         return userData.isAdmin ? 1 : 0;
       } catch (error) {
@@ -139,7 +138,6 @@
             const trashIcon = document.createElement('i');
             trashIcon.classList.add('fa-solid', 'fa-trash');
             trashIcon.style.marginRight = "20px";
-            console.log(user.UserId);
             trashIcon.addEventListener("click", () => deleteUser(user.UserId));
 
             // Create the pen icon

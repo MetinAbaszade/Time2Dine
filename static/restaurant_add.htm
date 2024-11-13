@@ -94,7 +94,6 @@
     });
     document.getElementById('restaurantForm').addEventListener('submit', async function(event) {
         event.preventDefault();
-        console.log(document.getElementById('restaurantName'));
         const restaurantData = {
             name: document.getElementById('restaurantName').value,
             address: document.getElementById('address').value,
@@ -106,7 +105,6 @@
         };
         try {
             const token = getcookie("token");
-            console.log(token);
             const response = await fetch(`http://5.75.182.107:8024/add_foodspot`, {
                 method: 'POST',  // Using POST for adding a new food spot
                 headers: {

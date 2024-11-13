@@ -102,10 +102,12 @@
     };
 
     try {
+        const token = getcookie("token");
         // Send the data to the Python backend
         const response = await fetch(`http://5.75.182.107:8024/get_foodspots?q=${query}`, {
             method: 'POST',
             headers: {
+                Authorization: `Bearer ${token}`,
                 'Content-Type': 'application/json'
             },
             body: JSON.stringify(userData)

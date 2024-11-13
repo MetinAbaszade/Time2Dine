@@ -94,7 +94,6 @@
 
         // Fetch data and hide loader once it's done
         fetchDataFromDatabase().then((data) => {
-          console.log("Data received:", data); // Use the data as needed
           loader.classList.add("loader-hidden");
 
           loader.addEventListener("transitionend", () => {
@@ -177,11 +176,9 @@
         if (favorite.isFavorite) {
           heartIcon.classList.remove("fa-regular");
           heartIcon.classList.add("fa-solid");
-          console.log(`Added ${favorite.Name} to favorites`);
         } else {
           heartIcon.classList.remove("fa-solid");
           heartIcon.classList.add("fa-regular");
-          console.log(`Removed ${favorite.Name} from favorites`);
         }
 
         fetch("http://5.75.182.107:8024/toggle_favorite", {
@@ -203,7 +200,6 @@
           })
           .then((data) => {
             if (data.message) {
-              console.log(data.message);
               if (!favorite.isFavorite) {
                 favoritesArray.splice(index, 1); // Remove from array
                 renderFavorites(favoritesArray); // Re-render favorites

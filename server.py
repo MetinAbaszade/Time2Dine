@@ -150,7 +150,7 @@ def is_admin(user_id):
     cursor = conn.cursor()
     try:
         # Check if the user has an admin role
-        admin_query = "SELECT Id FROM admin WHERE UserId = %s"
+        admin_query = "SELECT Id FROM admin WHERE Id = %s"
         cursor.execute(admin_query, (user_id,))
         is_admin = cursor.fetchone() is not None
         return is_admin

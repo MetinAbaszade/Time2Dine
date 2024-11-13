@@ -39,10 +39,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 });
 
-
-
-
-
       window.addEventListener("load", () => {
         const loader = document.querySelector(".loader");
         
@@ -59,7 +55,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         // Fetch data and hide loader once it's done
         fetchDataFromDatabase().then((data) => {
-          console.log("Data received:", data); // Use the data as needed
           loader.classList.add("loader-hidden");
 
           loader.addEventListener("transitionend", () => {
@@ -110,7 +105,6 @@ document.addEventListener("DOMContentLoaded", () => {
           if (!response.ok) throw new Error('Network response was not ok');
           
           const userData = await response.json();
-          console.log(userData.isAdmin);
           // Return 1 if the user is an admin, otherwise 0
           return userData.isAdmin ? 1 : 0;
         } catch (error) {
@@ -146,7 +140,6 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = "login.htm";
           } else if (response.ok) {
             const foodSpots = await response.json();
-            console.log(foodSpots);
 
             const restaurantList = document.querySelector(".restaurant-list");
             restaurantList.innerHTML = "";
@@ -178,7 +171,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (foodSpot.IsFavorite) {
                   heartIcon.className = "";
                   heartIcon.classList.add("fa-solid", "fa-heart");
-                  console.log(`Added ${foodSpot.Name} to favorites`);
 
                   fetch("http://5.75.182.107:8024/toggle_favorite", {
                     method: "POST",
@@ -202,7 +194,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                   heartIcon.className = "";
                   heartIcon.classList.add("fa-regular", "fa-heart");
-                  console.log(`Removed ${foodSpot.Name} from favorites`);
                   fetch("http://5.75.182.107:8024/toggle_favorite", {
                     method: "POST",
                     headers: {
