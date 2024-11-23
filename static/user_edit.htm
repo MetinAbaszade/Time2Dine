@@ -6,7 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
     <link rel="stylesheet" href="/static/resadd.css">
-    <title>Add User</title>
+    <title>Edit User</title>
 </head>
 <body>
 <div class="container mt-5">
@@ -38,11 +38,6 @@
                     <div class="mb-3">
                         <label for="email" class="form-label">Email</label>
                         <input type="email" class="form-control" id="email" required>
-                    </div>
-                    <!-- Password -->
-                    <div class="mb-3">
-                        <label for="password" class="form-label">Password</label>
-                        <input type="password" class="form-control" id="password" required>
                     </div>
                     <!-- Opening Time -->
                     <div class="time-container">
@@ -102,7 +97,6 @@
             return;
         }
         // console.log(userId);
-
         const token = getcookie("token");
         try {
             const response = await fetch(`http://5.75.182.107:8024/get_user_details/${userId}`, {
@@ -114,16 +108,17 @@
             });
 
             if (!response.ok) throw new Error("Network response was not ok");
-
             const user = await response.json();
+            // console.log(user.DateOfBirth);
             if (user) {
                 // Populate the form with the restaurant data
-                document.getElementById("firstName").value = user.firstName;
-                document.getElementById("lastName").value = user.lastName;
-                document.getElementById("phoneNumber").value = user.phoneNumber;
-                document.getElementById("email").value = user.email;
-                document.getElementById("password").value = user.password;
-                document.getElementById("dateOfBirth").value = user.dateOfBirth;
+                document.getElementById("firstName").value = user.FirstName;
+                document.getElementById("lastName").value = user.LastName;
+                document.getElementById("phoneNumber").value = user.PhoneNumber;
+                document.getElementById("email").value = user.Email;
+                const dateOfBirth = new Date(user.DateOfBirth);
+                const formattedDate = dateOfBirth.toISOString().split('T')[0];
+                document.getElementById('dateofbirth').value = formattedDate;
                 document.getElementById("isAdmin").value = user.isAdmin;
             } else {
                 alert("User not found.");
@@ -140,12 +135,11 @@
 
         const userId = getUrlParameter('user_id');
         const userData = {
-            firstName: document.getElementById('firstName').value, // Adjusted ID
-            lastName: document.getElementById('lastName').value,         // Adjusted ID
-            phoneNumber: document.getElementById('phoneNumber').value,
-            email: document.getElementById('email').value,            // Adjusted ID
-            password: document.getElementById('password').value,     // Adjusted ID
-            dateOfBirth: document.getElementById('dateofbirth').value,  // Adjusted ID
+            FirstName: document.getElementById('firstName').value, // Adjusted ID
+            LastName: document.getElementById('lastName').value,         // Adjusted ID
+            PhoneNumber: document.getElementById('phoneNumber').value,
+            Email: document.getElementById('email').value,            // Adjusted ID
+            DateOfBirth: document.getElementById('dateofbirth').value,  // Adjusted ID
             isAdmin: document.getElementById('isAdmin').checked         // Checkbox
         };
 
