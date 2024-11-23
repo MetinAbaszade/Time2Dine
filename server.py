@@ -1,10 +1,11 @@
-from flask import Flask, request, jsonify, send_from_directory, send_file
+import re
+import requests
+import jwt, datetime
+from functools import wraps
 from flask_cors import CORS 
 import mysql.connector, datetime
 from sshtunnel import SSHTunnelForwarder
-import jwt, datetime
-from functools import wraps
-import re
+from flask import Flask, request, jsonify, send_from_directory, send_file
 
 app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
@@ -63,7 +64,6 @@ def parse_access_log(file_path):
             if match:
                 log_entries.append(match.groupdict())
     return log_entries
-
 
 @app.route('/')
 def root():
@@ -558,7 +558,6 @@ def autocomplete_foodspots():
         cursor.close()
         conn.close()
 
-
 @app.route('/get_foodspots', methods=['GET'])
 @token_required
 def get_foodspots():
@@ -826,6 +825,45 @@ def download_access_log():
         return jsonify({'error': 'Access log file not found.'}), 404
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+# Function to get geolocation data from ipinfo.io
+def get_geo_location(ip_address):
+    try:
+        api_url = f"https://ipinfo.io/{ip_address}?token=169b1821a29c6d"
+        response = requests.get(api_url)
+        if response.status_code == 200:
+            print(response)
+            return response.json() 
+        else:
+            return None
+    except Exception as e:
+        print(f"Error fetching geolocation: {e}")
+        return None
+
+# Endpoint to get location details
+@app.route('/get_location', methods=['GET'])
+def get_location():
+    ip = request.headers.get('X-Forwarded-For', request.remote_addr)
+    print(ip)
+    
+    if not ip:
+        return jsonify({'error': 'Unable to determine IP address'}), 400
+    
+    # Fetch geolocation data
+    geo_data = get_geo_location(ip)
+    print(geo_data)
+    if geo_data:
+        latitude, longitude = geo_data['loc'].split(',')
+        return jsonify({
+            'ip': ip,
+            'latitude': latitude,
+            'longitude': longitude,
+            'city': geo_data.get('city', 'Unknown'),
+            'region': geo_data.get('region', 'Unknown'),
+            'country': geo_data.get('country', 'Unknown')
+        })
+    else:
+        return jsonify({'error': 'Failed to fetch geolocation data'}), 500
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8024, debug=True)
