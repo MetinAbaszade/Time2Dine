@@ -533,6 +533,32 @@ def get_favorites():
         cursor.close()
         conn.close()
 
+@app.route('/autocomplete_foodspots', methods=['GET'])
+@token_required
+def autocomplete_foodspots():
+    search_query = request.args.get('q', '')
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        foodspots_query = """
+            SELECT fs.Name
+            FROM foodspot fs
+            WHERE fs.Name LIKE %s
+        """
+        cursor.execute(foodspots_query, ('%' + search_query + '%',))
+        foodspots = cursor.fetchall()
+
+        suggestions = [spot['Name'] for spot in foodspots]
+
+        return jsonify(suggestions), 200
+    except mysql.connector.Error as err:
+        return jsonify({'error': str(err)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
 @app.route('/get_foodspots', methods=['GET'])
 @token_required
 def get_foodspots():
