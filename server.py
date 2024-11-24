@@ -110,7 +110,7 @@ def serve_imprint():
     return send_from_directory('static', 'imprint.htm')
 
 @app.route('/location.htm')
-def serve_imprint():
+def serve_location():
     return send_from_directory('static', 'location.htm')
 
 def extract_user_id_from_token():
