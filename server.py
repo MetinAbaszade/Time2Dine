@@ -101,6 +101,10 @@ def serve_register():
 def serve_restaurant():
     return send_from_directory('static', 'restaurant.htm')
 
+@app.route('/restaurant_edit.htm')
+def serve_restaurant_edit():
+    return send_from_directory('static', 'restaurant_edit.htm')
+
 @app.route('/fav.htm')
 def serve_fav():
     return send_from_directory('static', 'fav.htm')
@@ -108,6 +112,14 @@ def serve_fav():
 @app.route('/imprint.htm')
 def serve_imprint():
     return send_from_directory('static', 'imprint.htm')
+
+@app.route('/location.htm')
+def serve_location():
+    return send_from_directory('static', 'location.htm')
+
+@app.route('/search.htm')
+def serve_search():
+    return send_from_directory('static', 'search.htm')
 
 def extract_user_id_from_token():
     token = request.headers.get('Authorization')

@@ -267,7 +267,7 @@
       if (confirm("Are you sure you want to delete this restaurant?")) {
         try {
           const response = await fetch(
-            `http://5.75.182.107:8024/delete_restaurant/${restaurantId}`,
+            `http://5.75.182.107:8024/delete_foodspot/${restaurantId}`,
             {
               method: "DELETE",
               headers: {
