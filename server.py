@@ -101,6 +101,10 @@ def serve_register():
 def serve_restaurant():
     return send_from_directory('static', 'restaurant.htm')
 
+@app.route('/restaurant_edit.htm')
+def serve_restaurant():
+    return send_from_directory('static', 'restaurant_edit.htm')
+
 @app.route('/fav.htm')
 def serve_fav():
     return send_from_directory('static', 'fav.htm')

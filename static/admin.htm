@@ -241,7 +241,7 @@
         penIcon.style.marginRight = "20px";
 
         const link = document.createElement('a');
-        link.href = `/update_foodspot/${restaurant.FoodSpotId}`;  // Pass FoodSpotId as a URL parameter
+        link.href = `restaurant_edit.htm?foodspot_id=${restaurant.FoodSpotId}`;  // Pass FoodSpotId as a URL parameter
         link.appendChild(penIcon);
         link.style.color = "black";
 
