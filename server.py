@@ -113,6 +113,10 @@ def serve_imprint():
 def serve_location():
     return send_from_directory('static', 'location.htm')
 
+@app.route('/search.htm')
+def serve_search():
+    return send_from_directory('static', 'search.htm')
+
 def extract_user_id_from_token():
     token = request.headers.get('Authorization')
     # Extract the token after "Bearer"
