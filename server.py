@@ -102,7 +102,7 @@ def serve_restaurant():
     return send_from_directory('static', 'restaurant.htm')
 
 @app.route('/restaurant_edit.htm')
-def serve_restaurant():
+def serve_restaurant_edit():
     return send_from_directory('static', 'restaurant_edit.htm')
 
 @app.route('/fav.htm')
