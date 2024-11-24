@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Location</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/fav.css">
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+
+</head>
+<body>
+
+    <header>
+        <div class="logo">
+          <a href="index.htm"> Time2Dine </a>
+        </div>
+        <div class="right-side2">
+          <div class="home">
+            <a href="index.htm">Home</a>
+          </div>
+      </header>
+
+      <div id="map" style="height: 500px;"></div>
+
+      <footer>
+        <div class="footer-links">
+          <a href="#">Support</a>
+          <a href="imprint.htm">Imprint Page</a>
+          <a href="#">Terms and settings</a>
+        </div>
+        <div class="footer-info">
+          <p>
+            Coronavirus (COVID-19) FAQs | Manage your trips | Contact Customer
+            Service
+          </p>
+          <p>Privacy & cookies | Terms and conditions | Dispute resolution</p>
+        </div>
+      </footer>
+
+      <script>
+        // Fetch geolocation data from the backend API
+        fetch('http://5.75.182.107:8024/get_location')
+          .then(response => response.json())
+          .then(data => {
+            // Check if the response contains the necessary data
+            if (data.latitude && data.longitude) {
+              const { latitude, longitude, ip } = data;
+              
+              // Initialize the map and center it on the latitude/longitude
+              const map = L.map('map').setView([latitude, longitude], 13);  // Zoom level 13
+              
+              // Add OpenStreetMap tile layer
+              L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              }).addTo(map);
+              
+              // Add a marker at the given coordinates
+              const marker = L.marker([latitude, longitude]).addTo(map);
+              
+              // Bind a popup to the marker with the IP address
+              marker.bindPopup(`<b>IP Address:</b> ${ip}`).openPopup();
+            } else {
+              console.error('Geolocation data is incomplete.');
+            }
+          })
+          .catch(error => {
+            console.error('Error fetching geolocation data:', error);
+          });
+      </script>
+      
+      
+    
+</body>
+</html>

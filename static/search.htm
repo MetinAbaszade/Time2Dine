@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Time2Dine Favorites</title>
+    <link rel="stylesheet" href="/static/search.css">
+    <link rel="stylesheet" href="/static/style.css" />
+    <link rel="stylesheet" href="/static/fav.css" />
+    <script src="utils.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+    <style>
+      .autocomplete-box {
+        max-width: 500px;
+        margin: auto;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- <div class="loader"></div> -->
+    <header>
+      <div class="logo">
+        <a href="index.htm"> Time2Dine </a>
+      </div>
+      <div class="right-side2">
+        <div class="home">
+          <a href="index.htm">Home</a>
+        </div>
+    </header>
+
+    <section id="search" class="search-section">
+      <h1>Search Here</h1>
+      <div class="search-box">
+        <input
+          style="width: 100%"
+          type="text"
+          id="search-input"
+          placeholder="Restaurant & Café"
+        />
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+    </section>
+
+    <footer>
+      <div class="footer-links">
+        <a href="#">Support</a>
+        <a href="imprint.htm">Imprint Page</a>
+        <a href="#">Terms and settings</a>
+      </div>
+      <div class="footer-info">
+        <p>
+          Coronavirus (COVID-19) FAQs | Manage your trips | Contact Customer
+          Service
+        </p>
+        <p>Privacy & cookies | Terms and conditions | Dispute resolution</p>
+      </div>
+    </footer>
+
+    <!-- <script>
+      window.onload = function () {
+        const token = getcookie("token");
+    
+        if (!token) {
+          // Redirect to login page immediately if token is missing
+          window.location.href = "login.htm";
+        } else {
+          // Show the body if the token exists
+          document.body.style.display = "block";
+        }
+    
+        // Attach autocomplete functionality to the search input
+        $("#search-input").autocomplete({
+          source: function (request, response) {
+            // Perform an AJAX request for autocomplete suggestions
+            $.ajax({
+              url: "http://5.75.182.107:8024/autocomplete_foodspots", // Your backend API endpoint
+              method: "GET",
+              dataType: "json",
+              data: {
+                q: request.term // Send the search term
+              },
+              headers: {
+                Authorization: `Bearer ${getcookie("token")}` // Include token for authorization
+              },
+              success: function (data) {
+                response(data); // Provide suggestions to the autocomplete widget
+              },
+              error: function (xhr, status, error) {
+                console.error("Error fetching autocomplete suggestions:", error);
+              }
+            });
+          },
+          minLength: 2, // Trigger autocomplete after 2+ characters
+          select: function (event, ui) {
+            console.log("Selected:", ui.item.value);
+            // You could also call `renderFoodSpots` to display results dynamically here
+          }
+        });
+      };
+      
+      
+      // Function to render the list of food spots (can be used for displaying detailed results)
+      function renderFoodSpots(foodSpots) {
+        const $restaurantList = $(".restaurant-list"); // Select the container using jQuery
+        $restaurantList.empty(); // Clear any existing content
+    
+        foodSpots.forEach((spot) => {
+          const $spotElement = $(`
+            <div class="restaurant-item">
+              <h3>${spot.name}</h3>
+              <p>${spot.description}</p>
+            </div>
+          `);
+          $restaurantList.append($spotElement); // Append each dynamically created element
+        });
+      }
+    </script> -->
+    
+    
+  </body>
+  <script>
+    window.onload = function () {
+      const token = getcookie("token");
+  
+      if (!token) {
+        // Redirect to login page immediately if token is missing
+        window.location.href = "login.htm";
+      } else {
+        // Show the body if the token exists
+        document.body.style.display = "block";
+      }
+  
+      // Attach autocomplete functionality to the search input
+      $("#search-input").autocomplete({
+        source: function (request, response) {
+          // Perform an AJAX request for autocomplete suggestions
+          $.ajax({
+            url: "http://5.75.182.107:8024/autocomplete_foodspots", // Your backend API endpoint
+            method: "GET",
+            dataType: "json",
+            data: {
+              q: request.term // Send the search term
+            },
+            headers: {
+              Authorization: `Bearer ${getcookie("token")}` // Include token for authorization
+            },
+            success: function (data) {
+              response(data); // Provide suggestions to the autocomplete widget
+            },
+            error: function (xhr, status, error) {
+              console.error("Error fetching autocomplete suggestions:", error);
+            }
+          });
+        },
+        minLength: 2, // Trigger autocomplete after 2+ characters
+        select: function (event, ui) {
+          console.log("Selected:", ui.item.value);
+        },
+        open: function () {
+          // Optional: Apply a custom z-index for the dropdown if needed
+          $(".ui-autocomplete").css("z-index", 9999);
+          // Clear the accessibility message
+          $(".ui-helper-hidden-accessible").empty();
+        }
+      });
+    };
+  
+    // Function to render the list of food spots (can be used for displaying detailed results)
+    function renderFoodSpots(foodSpots) {
+      const $restaurantList = $(".restaurant-list"); // Select the container using jQuery
+      $restaurantList.empty(); // Clear any existing content
+  
+      foodSpots.forEach((spot) => {
+        const $spotElement = $(`
+          <div class="restaurant-item">
+            <h3>${spot.name}</h3>
+            <p>${spot.description}</p>
+          </div>
+        `);
+        $restaurantList.append($spotElement); // Append each dynamically created element
+      });
+    }
+  </script>
+  
+  
+</html>
