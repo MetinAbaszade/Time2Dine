@@ -234,7 +234,8 @@
         const trashIcon = document.createElement("i");
         trashIcon.classList.add("fa-solid", "fa-trash");
         trashIcon.style.marginRight = "20px";
-        trashIcon.addEventListener("click", () => deleteRestaurant(restaurant.RestaurantId)); // Attach event listener
+       
+        trashIcon.addEventListener("click", () => deleteRestaurant(restaurant.FoodSpotId)); // Attach event listener
 
         const penIcon = document.createElement("i");
         penIcon.classList.add("fa-solid", "fa-pen");
@@ -277,6 +278,7 @@
             }
           );
 
+          console.log(response);
           if (!response.ok) throw new Error("Failed to delete restaurant");
 
           alert("Restaurant deleted successfully");
