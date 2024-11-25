@@ -663,24 +663,35 @@ def get_foodspots():
 
     try:
         foodspots_query = """
-            SELECT fs.Id AS FoodSpotId, fs.Name, fs.Rating, fs.ImageUrl, 
-                   CASE 
-                       WHEN r.Id IS NOT NULL THEN 'Restaurant'
-                       WHEN c.Id IS NOT NULL THEN 'Cafe'
-                       ELSE 'Unknown'
-                   END AS FoodSpotType,
-                   r.Id AS RestaurantId,
-                   c.Id AS CafeId,
-                   CASE 
-                       WHEN f.CustomerId IS NOT NULL THEN TRUE
-                       ELSE FALSE
-                   END AS IsFavorite
+            SELECT 
+                fs.Id AS FoodSpotId, 
+                fs.Name, 
+                fs.Rating, 
+                fs.ImageUrl, 
+                CASE 
+                    WHEN r.Id IS NOT NULL THEN 'Restaurant'
+                    WHEN c.Id IS NOT NULL THEN 'Cafe'
+                    ELSE 'Unknown'
+                END AS FoodSpotType,
+                r.Id AS RestaurantId,
+                c.Id AS CafeId,
+                CASE 
+                    WHEN f.CustomerId IS NOT NULL THEN TRUE
+                    ELSE FALSE
+                END AS IsFavorite
             FROM foodspot fs
             LEFT JOIN restaurant r ON fs.Id = r.FoodSpotId
             LEFT JOIN cafe c ON fs.Id = c.FoodSpotId
-            LEFT JOIN favorites f ON fs.Id = f.FoodSpotId AND f.CustomerId = %s
+            LEFT JOIN favorites f 
+                ON fs.Id = f.FoodSpotId 
+                AND f.CustomerId = (
+                    SELECT Id 
+                    FROM customer 
+                    WHERE UserId = %s
+                )
             WHERE fs.Name LIKE %s
         """
+
         cursor.execute(foodspots_query, (user_id, '%' + search_query + '%'))  
         foodspots = cursor.fetchall()
 
