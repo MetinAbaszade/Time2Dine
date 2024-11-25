@@ -9,7 +9,7 @@
     />
     <link rel="stylesheet" href="/static/style.css">
     <link rel="stylesheet" href="/static/admin.css">
-    <link rel="stylesheet" href="/static/utils.js">
+    <script src="/static/utils.js"></script>
     <title>Admin</title>
 </head>
 <body>
@@ -148,47 +148,59 @@
           dataList.innerHTML = '';
 
           // Append each user as a list item
+          // Assume `currentUserId` holds the UserId of the logged-in admin
+          // Assume the token is stored in a variable `jwtToken`
+          const jwtToken = getcookie('token'); // Replace with your method of getting the JWT
+          const decodedToken = parseJwt(jwtToken);
+          const currentUserId = decodedToken.userId; // Extract UserId from the payload
+
+          console.log(currentUserId);
           users.forEach(user => {
-            // Create the list item
-            const listItem = document.createElement('li');
-            listItem.textContent = `${user.FirstName} ${user.LastName} (${user.Role}) - ${user.Email}, Phone: ${user.PhoneNumber}`;
-            
-            // Create the icons container (to group the icons and checkbox together)
-            const iconsContainer = document.createElement('div');
-            iconsContainer.style.display = 'inline-flex'; // Optional, to display icons inline
-            
-            // Create the trash icon
-            const trashIcon = document.createElement('i');
-            trashIcon.classList.add('fa-solid', 'fa-trash');
-            trashIcon.style.marginRight = "20px";
-            trashIcon.addEventListener("click", () => deleteUser(user.UserId));
+              // Create the list item
+              const listItem = document.createElement('li');
+              listItem.textContent = `${user.FirstName} ${user.LastName} (${user.Role}) - ${user.Email}, Phone: ${user.PhoneNumber}`;
+              
+              // Create the icons container
+              const iconsContainer = document.createElement('div');
+              iconsContainer.style.display = 'inline-flex'; // Optional, to display icons inline
+              
+              console.log(user.UserId);
 
-            // Create the pen icon
-            const penIcon = document.createElement('i');
-            penIcon.classList.add('fa-solid', 'fa-pen');
-            penIcon.style.marginRight = '20px'; // Optional, to add spacing between icons
-            
-            const link = document.createElement('a');
-            link.href = `user_edit.htm?user_id=${user.UserId}`;  // Pass FoodSpotId as a URL parameter
-            link.appendChild(penIcon);
-            link.style.color = "black";
+              if (user.UserId != currentUserId) { // Check if the user is not the logged-in admin
+                  // Create the trash icon
+                  const trashIcon = document.createElement('i');
+                  trashIcon.classList.add('fa-solid', 'fa-trash');
+                  trashIcon.style.marginRight = "20px";
+                  trashIcon.addEventListener("click", () => deleteUser(user.UserId));
 
-          
-            // Create the checkbox for "is admin"
-            const isAdminCheckbox = document.createElement('input');
-            isAdminCheckbox.type = 'checkbox';
-            isAdminCheckbox.checked = user.Role === 'Admin'; // Check the box if the user is an admin
-            
-            // Append the icons and checkbox to the icons container
-            iconsContainer.appendChild(trashIcon);
-            iconsContainer.appendChild(link);
-            iconsContainer.appendChild(isAdminCheckbox);
-            
-            // Append the icons container to the list item
-            listItem.appendChild(iconsContainer);
+                  // Create the pen icon
+                  const penIcon = document.createElement('i');
+                  penIcon.classList.add('fa-solid', 'fa-pen');
+                  penIcon.style.marginRight = '20px'; // Optional, to add spacing between icons
+                  
+                  const link = document.createElement('a');
+                  link.href = `user_edit.htm?user_id=${user.UserId}`; // Pass FoodSpotId as a URL parameter
+                  link.appendChild(penIcon);
+                  link.style.color = "black";
 
-            // Append the list item to the data list
-            dataList.appendChild(listItem);
+                  // Append the icons to the icons container
+                  iconsContainer.appendChild(trashIcon);
+                  iconsContainer.appendChild(link);
+              }
+
+              // Create the checkbox for "is admin"
+              const isAdminCheckbox = document.createElement('input');
+              isAdminCheckbox.type = 'checkbox';
+              isAdminCheckbox.checked = user.Role === 'Admin'; // Check the box if the user is an admin
+
+              // Append the checkbox to the icons container
+              iconsContainer.appendChild(isAdminCheckbox);
+              
+              // Append the icons container to the list item
+              listItem.appendChild(iconsContainer);
+
+              // Append the list item to the data list
+              dataList.appendChild(listItem);
           });
 
       } catch (error) {

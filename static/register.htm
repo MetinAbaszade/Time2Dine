@@ -61,16 +61,16 @@
         event.preventDefault();
 
         const userData = {
-            firstName: document.getElementById('firstName').value,
-            lastName: document.getElementById('lastName').value,
-            email: document.getElementById('email').value,
-            password: document.getElementById('password').value,
-            dateOfBirth: document.getElementById('dateOfBirth').value,
-            phoneNumber: document.getElementById('phoneNumber').value
+            FirstName: document.getElementById('firstName').value,
+            LastName: document.getElementById('lastName').value,
+            Email: document.getElementById('email').value,
+            Password: document.getElementById('password').value,
+            DateOfBirth: document.getElementById('dateOfBirth').value,
+            PhoneNumber: document.getElementById('phoneNumber').value
         };
 
         try {
-            const response = await fetch('http://5.75.182.107:8024/add_user', {
+            const response = await fetch('http://5.75.182.107:8024/register_user', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -83,10 +83,10 @@
             messageElement.innerHTML = '';
 
             if (response.ok) {
-                window.location.href = 'index.htm';
+                // window.location.href = 'index.htm';
             } else {
                 messageElement.innerHTML = `<div class="alert alert-danger">Error: ${result.error}</div>`;
-                window.location.href = 'index.htm';
+                // window.location.href = 'index.htm';
             }
         } catch (error) {
             document.getElementById('message').innerHTML = `<div class="alert alert-danger">Error: ${error.message}</div>`;
