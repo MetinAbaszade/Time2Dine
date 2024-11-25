@@ -759,14 +759,14 @@ def add_foodspot():
     phone_number = data['phoneNumber']
     opening_time = data['openingTime']
     closing_time = data['closingTime']
-    rating = data.get('rating', 0)  # Default to 0 if no rating is provided
+    rating = data.get('rating', 0) 
     is_restaurant = data.get('isRestaurant', True)  # Assume it's a restaurant by default
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        # Insert into FoodSpot and retrieve AdminId in one query
+        # Insert into FoodSpot table
         foodspot_query = """
             INSERT INTO foodspot (AdminId, Name, Address, ImageUrl, PhoneNumber, OpeningTime, ClosingTime, Rating)
             SELECT a.Id, %s, %s, %s, %s, %s, %s, %s
@@ -775,9 +775,17 @@ def add_foodspot():
         """
         cursor.execute(foodspot_query, (name, address, image_url, phone_number, opening_time, closing_time, rating, user_id))
 
-        # Retrieve the auto-generated FoodSpotId
-        cursor.execute("SELECT LAST_INSERT_ID()")
+        # Retrieve the UUID of the inserted FoodSpot row
+        foodspot_id_query = """
+            SELECT Id 
+            FROM foodspot
+            WHERE AdminId = (SELECT Id FROM admin WHERE UserId = %s)
+              AND Name = %s
+              AND Address = %s
+        """
+        cursor.execute(foodspot_id_query, (user_id, name, address))
         foodspot_id = cursor.fetchone()[0]
+
         print("FOODSPOTID:::::::::\n", foodspot_id)
 
         # If it's a restaurant, insert into Restaurant table
