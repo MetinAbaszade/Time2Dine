@@ -289,6 +289,43 @@ def add_user():
         cursor.close()
         conn.close()
 
+@app.route('/register_user', methods=['POST'])
+def register_user():   
+    data = request.json
+    first_name = data['FirstName']
+    last_name = data['LastName']
+    email = data['Email']
+    password = data['Password']
+    date_of_birth = data['DateOfBirth']
+    phone_number = data['PhoneNumber']
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Insert into Users table
+        user_query = """
+            INSERT INTO users (FirstName, LastName, Email, Password, DateOfBirth, PhoneNumber)
+            VALUES (%s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(user_query, (first_name, last_name, email, password, date_of_birth, phone_number))
+
+        # Get the newly created User ID
+        new_user_id = cursor.lastrowid
+
+        customer_query = "INSERT INTO customer (UserId) VALUES (%s)"
+        cursor.execute(customer_query, (new_user_id,))
+
+        conn.commit()
+        return jsonify({'message': 'User registered successfully with role'}), 201
+    except mysql.connector.Error as err:
+        conn.rollback()
+        return jsonify({'error': str(err)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+
 @app.route('/update_user/<user_id_to_update>', methods=['PUT'])
 @token_required
 def update_user(user_id_to_update):

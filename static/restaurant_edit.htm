@@ -77,6 +77,47 @@
 
 
 <script>
+     window.onload = async function () {
+        const token = getcookie("token");
+        if (!token) {
+            // Redirect to login page immediately if token is missing
+            window.location.href = "login.htm";
+        } else {
+            const isAdmin = await checkUserRole();
+            if (isAdmin == 0) {
+            // If the user is an admin, redirect to admin page
+            window.location.href = "index.htm";
+          } else {
+            fetchRestaurantData();
+            // If the user is not an admin, fetch food spots
+            document.body.style.display = "block";
+          }
+        }
+    };
+
+    async function checkUserRole(query = "") {
+      try {
+        
+        const token = getcookie("token");
+        const response = await fetch(`http://5.75.182.107:8024/is_admin?q=${query}`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+        
+        if (!response.ok) throw new Error('Network response was not ok');
+        
+        const userData = await response.json();
+        // Return 1 if the user is an admin, otherwise 0
+        return userData.isAdmin ? 1 : 0;
+      } catch (error) {
+        console.error("Error fetching user role:", error);
+        return 0; // Default to 0 if there's an error
+      }
+    }
+
     // Function to get the token from cookies
     function getcookie(name) {
         const value = `; ${document.cookie}`;
@@ -129,7 +170,7 @@
     }
 
     // Fetch restaurant data when the page loads
-    window.onload = fetchRestaurantData;
+    // window.onload = fetchRestaurantData;
     document.getElementById('restaurantForm').addEventListener('submit', async function(event) {
     event.preventDefault();
 
