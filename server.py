@@ -766,20 +766,22 @@ def add_foodspot():
     cursor = conn.cursor()
 
     try:
-        # Insert into FoodSpot table
+        # Insert into FoodSpot and retrieve AdminId in one query
         foodspot_query = """
             INSERT INTO foodspot (AdminId, Name, Address, ImageUrl, PhoneNumber, OpeningTime, ClosingTime, Rating)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
+            SELECT a.Id, %s, %s, %s, %s, %s, %s, %s
+            FROM admin a
+            WHERE a.UserId = %s
         """
-        cursor.execute(foodspot_query, (user_id, name, address, image_url, phone_number, opening_time, closing_time, rating))
+        cursor.execute(foodspot_query, (name, address, image_url, phone_number, opening_time, closing_time, rating, user_id))
 
         # Retrieve the auto-generated FoodSpotId
         cursor.execute("SELECT LAST_INSERT_ID()")
         foodspot_id = cursor.fetchone()[0]
-        print("FOODSPOTID:::::::::\n")
-        print(foodspot_id)
+        print("FOODSPOTID:::::::::\n", foodspot_id)
+
+        # If it's a restaurant, insert into Restaurant table
         if is_restaurant:
-            # Insert into Restaurant table using the same FoodSpotId
             restaurant_query = "INSERT INTO restaurant (FoodSpotId) VALUES (%s)"
             cursor.execute(restaurant_query, (foodspot_id,))
 
