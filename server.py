@@ -748,25 +748,32 @@ def get_foodspot(foodspot_id):
 @token_required
 def add_foodspot():
     user_id = extract_user_id_from_token()
-    
+
     # Check if the user is an admin
     if not is_admin(user_id):
         return jsonify({'error': 'Unauthorized. Only admins can add a food spot.'}), 403
 
     data = request.json
-    admin_id = user_id  # Use user_id as the admin adding the food spot
     name = data['name']
     address = data['address']
     image_url = data['imageUrl']
     phone_number = data['phoneNumber']
     opening_time = data['openingTime']
     closing_time = data['closingTime']
-    rating = data.get('rating', 0)  # Default to 0 if no rating is provided
+    rating = data.get('rating', 0) 
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
+        # Retrieve AdminId using UserId
+        admin_query = "SELECT Id FROM admin WHERE UserId = %s"
+        cursor.execute(admin_query, (user_id,))
+        admin = cursor.fetchone()
+        if not admin:
+            return jsonify({'error': 'Admin not found for the given user.'}), 404
+        admin_id = admin[0]
+
         # Insert into FoodSpot table
         foodspot_query = """
             INSERT INTO foodspot (AdminId, Name, Address, ImageUrl, PhoneNumber, OpeningTime, ClosingTime, Rating)
