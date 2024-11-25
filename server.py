@@ -249,14 +249,14 @@ def add_user():
         return jsonify({'error': 'Unauthorized. Only admins can add users.'}), 403
 
     data = request.json
-    first_name = data['firstName']
-    last_name = data['lastName']
-    email = data['email']
-    password = data['password']
-    date_of_birth = data['dateOfBirth']
-    phone_number = data['phoneNumber']
-    # Default to Customer if role is not provided
-    role = data.get('role', 'Customer')  
+    first_name = data['FirstName']
+    last_name = data['LastName']
+    email = data['Email']
+    password = data['Password']
+    date_of_birth = data['DateOfBirth']
+    phone_number = data['PhoneNumber']
+    # Default to non-admin if not provided
+    is_admin_flag = data.get('isAdmin', 0)  
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -270,15 +270,11 @@ def add_user():
         cursor.execute(user_query, (first_name, last_name, email, password, date_of_birth, phone_number))
 
         # Get the newly created User ID
-        user_id = cursor.lastrowid
+        new_user_id = cursor.lastrowid
 
-        # Assign role in either Admin or Customer table
-        if role == 'Admin':
+        if is_admin_flag:
             admin_query = "INSERT INTO admin (UserId) VALUES (%s)"
-            cursor.execute(admin_query, (user_id,))
-        else:
-            customer_query = "INSERT INTO customer (UserId) VALUES (%s)"
-            cursor.execute(customer_query, (user_id,))
+            cursor.execute(admin_query, (new_user_id,))
 
         conn.commit()
         return jsonify({'message': 'User added successfully with role'}), 201
@@ -299,22 +295,22 @@ def update_user(user_id_to_update):
         return jsonify({'error': 'Unauthorized. Only admins can update users.'}), 403
 
     data = request.json
-    first_name = data.get('firstName')
-    last_name = data.get('lastName')
-    email = data.get('email')
-    password = data.get('password')
-    date_of_birth = data.get('dateOfBirth')
-    phone_number = data.get('phoneNumber')
+    first_name = data.get('FirstName')
+    last_name = data.get('LastName')
+    email = data.get('Email')
+    date_of_birth = data.get('DateOfBirth')
+    phone_number = data.get('PhoneNumber')
+    is_admin_flag = data.get('isAdmin')
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
+        # Update the Users table
         update_query = "UPDATE users SET "
         fields = []
         values = []
 
-        # Build update fields based on provided data
         if first_name:
             fields.append("FirstName = %s")
             values.append(first_name)
@@ -324,9 +320,6 @@ def update_user(user_id_to_update):
         if email:
             fields.append("Email = %s")
             values.append(email)
-        if password:
-            fields.append("Password = %s")
-            values.append(password)
         if date_of_birth:
             fields.append("DateOfBirth = %s")
             values.append(date_of_birth)
@@ -338,8 +331,21 @@ def update_user(user_id_to_update):
         values.append(user_id_to_update)
 
         cursor.execute(update_query, tuple(values))
-        conn.commit()
 
+        # Handle isAdmin updates
+        if is_admin_flag is not None:
+            admin_check_query = "SELECT * FROM admin WHERE UserId = %s"
+            cursor.execute(admin_check_query, (user_id_to_update,))
+            is_admin_exists = cursor.fetchone()
+
+            if is_admin_flag and not is_admin_exists:
+                admin_insert_query = "INSERT INTO admin (UserId) VALUES (%s)"
+                cursor.execute(admin_insert_query, (user_id_to_update,))
+            elif not is_admin_flag and is_admin_exists:
+                admin_delete_query = "DELETE FROM admin WHERE UserId = %s"
+                cursor.execute(admin_delete_query, (user_id_to_update,))
+
+        conn.commit()
         return jsonify({'message': 'User updated successfully'}), 200
     except mysql.connector.Error as err:
         conn.rollback()
@@ -539,6 +545,36 @@ def get_favorites():
                     favorite[key] = str(value)
 
         return jsonify(favorites), 200
+    except mysql.connector.Error as err:
+        return jsonify({'error': str(err)}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@app.route('/autocomplete_favorites', methods=['GET'])
+@token_required
+def autocomplete_favorites():
+    user_id = extract_user_id_from_token()
+    search_query = request.args.get('q', '')
+
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    try:
+        # Query to fetch matching favorites based on the search query
+        favorites_query = """
+            SELECT fs.Name
+            FROM favorites f
+            JOIN foodspot fs ON f.FoodSpotId = fs.Id
+            WHERE f.CustomerId = %s AND fs.Name LIKE %s
+        """
+        cursor.execute(favorites_query, (user_id, '%' + search_query + '%'))
+        favorites = cursor.fetchall()
+
+        # Extract just the names for the autocomplete suggestions
+        suggestions = [favorite['Name'] for favorite in favorites]
+
+        return jsonify(suggestions), 200
     except mysql.connector.Error as err:
         return jsonify({'error': str(err)}), 500
     finally:
