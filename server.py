@@ -85,6 +85,10 @@ def serve_restaurant_add_page():
 def serve_user_add_page():
     return send_from_directory('static', 'user_add.htm')
 
+@app.route('/user_edit.htm')
+def serve_user_edit_page():
+    return send_from_directory('static', 'user_edit.htm')
+
 @app.route('/index.htm')
 def serve_index():
     return send_from_directory('static', 'index.htm')
