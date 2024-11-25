@@ -46,7 +46,7 @@ body {
 
 /*ChatGpt Construction*/
 
-#restaurantForm {
+#restaurantForm, #userForm{
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -54,7 +54,7 @@ body {
     width: 100%;
 }
 
-#restaurantForm .form-row {
+#restaurantForm .form-row, #userForm .form-row {
     display: flex;
     width: 100%;
     justify-content: space-between;
@@ -68,11 +68,28 @@ body {
     width: 48%; 
 }
 
+#userForm .form-row .left,
+#userForm .form-row .right {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 48%; 
+}
+
 #restaurantForm .form-row .mb-3 {
     width: 100%;
 }
 
 #restaurantForm button {
+    align-self: center;
+    margin-top: 20px;
+}
+
+#userForm .form-row .mb-3 {
+    width: 100%;
+}
+
+#userForm button {
     align-self: center;
     margin-top: 20px;
 }
