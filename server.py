@@ -325,7 +325,6 @@ def register_user():
         cursor.close()
         conn.close()
 
-
 @app.route('/update_user/<user_id_to_update>', methods=['PUT'])
 @token_required
 def update_user(user_id_to_update):
@@ -748,34 +747,51 @@ def get_foodspot(foodspot_id):
 @token_required
 def add_foodspot():
     user_id = extract_user_id_from_token()
-    
+
     # Check if the user is an admin
     if not is_admin(user_id):
         return jsonify({'error': 'Unauthorized. Only admins can add a food spot.'}), 403
 
     data = request.json
-    admin_id = user_id  # Use user_id as the admin adding the food spot
     name = data['name']
     address = data['address']
     image_url = data['imageUrl']
     phone_number = data['phoneNumber']
     opening_time = data['openingTime']
     closing_time = data['closingTime']
-    rating = data.get('rating', 0)  # Default to 0 if no rating is provided
+    rating = data.get('rating', 0)  
+    is_restaurant = data.get('isRestaurant', True) 
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
+        # Retrieve AdminId using UserId
+        admin_query = "SELECT Id FROM admin WHERE UserId = %s"
+        cursor.execute(admin_query, (user_id,))
+        admin = cursor.fetchone()
+        if not admin:
+            return jsonify({'error': 'Admin not found for the given user.'}), 404
+        admin_id = admin[0]
+
         # Insert into FoodSpot table
         foodspot_query = """
             INSERT INTO foodspot (AdminId, Name, Address, ImageUrl, PhoneNumber, OpeningTime, ClosingTime, Rating)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(foodspot_query, (admin_id, name, address, image_url, phone_number, opening_time, closing_time, rating))
+
+        # Retrieve the newly created FoodSpotId
+        foodspot_id = cursor.lastrowid
+
+        # If it's a restaurant, insert into the restaurant table
+        if is_restaurant:
+            restaurant_query = "INSERT INTO restaurant (FoodSpotId) VALUES (%s)"
+            cursor.execute(restaurant_query, (foodspot_id,))
+
         conn.commit()
 
-        return jsonify({'message': 'FoodSpot added successfully'}), 201
+        return jsonify({'message': 'FoodSpot added successfully', 'foodSpotId': foodspot_id}), 201
     except mysql.connector.Error as err:
         conn.rollback()
         return jsonify({'error': str(err)}), 500
@@ -850,7 +866,7 @@ def update_foodspot(foodspot_id):
 @token_required
 def delete_foodspot(foodspot_id):
     user_id = extract_user_id_from_token()
-    
+
     # Check if the user is an admin
     if not is_admin(user_id):
         return jsonify({'error': 'Unauthorized. Only admins can delete a food spot.'}), 403
@@ -859,10 +875,37 @@ def delete_foodspot(foodspot_id):
     cursor = conn.cursor()
 
     try:
-        delete_query = "DELETE FROM foodspot WHERE Id = %s"
-        cursor.execute(delete_query, (foodspot_id,))
-        conn.commit()
+        # Check if the FoodSpot exists
+        check_query = "SELECT Id FROM foodspot WHERE Id = %s"
+        cursor.execute(check_query, (foodspot_id,))
+        if cursor.fetchone() is None:
+            return jsonify({'error': 'FoodSpot not found'}), 404
 
+        # Check if the FoodSpot is a Cafe or Restaurant
+        check_cafe_query = "SELECT Id FROM cafe WHERE FoodSpotId = %s"
+        cursor.execute(check_cafe_query, (foodspot_id,))
+        cafe = cursor.fetchone()
+
+        if cafe:
+            # Delete from Cafe table
+            delete_cafe_query = "DELETE FROM cafe WHERE FoodSpotId = %s"
+            cursor.execute(delete_cafe_query, (foodspot_id,))
+        else:
+            # Check if the FoodSpot is a Restaurant
+            check_restaurant_query = "SELECT Id FROM restaurant WHERE FoodSpotId = %s"
+            cursor.execute(check_restaurant_query, (foodspot_id,))
+            restaurant = cursor.fetchone()
+
+            if restaurant:
+                # Delete from Restaurant table
+                delete_restaurant_query = "DELETE FROM restaurant WHERE FoodSpotId = %s"
+                cursor.execute(delete_restaurant_query, (foodspot_id,))
+
+        # Finally, delete from FoodSpot table
+        delete_foodspot_query = "DELETE FROM foodspot WHERE Id = %s"
+        cursor.execute(delete_foodspot_query, (foodspot_id,))
+
+        conn.commit()
         return jsonify({'message': 'FoodSpot deleted successfully'}), 200
     except mysql.connector.Error as err:
         conn.rollback()
