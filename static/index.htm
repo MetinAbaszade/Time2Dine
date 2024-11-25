@@ -16,28 +16,47 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
+    <style>
+      .autocomplete-box {
+        max-width: 260px;
+        margin: auto;
+      }
+      /* input {
+        width: 100%;
+        padding: 8px;
+        font-size: 16px;
+      } */
+    </style>
+
     <title>Time2Dine</title>
 
     <script>
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const logoutButton = document.getElementById("logoutButton");
-      if (logoutButton) {
-        logoutButton.addEventListener("click", () => {
-          // Clear the token cookie by setting its expiration date to the past
-          // Try different paths to ensure it’s removed correctly
-          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/static;";
-          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=127.0.0.1;";
-          document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/static; domain=127.0.0.1;";
+      document.addEventListener("DOMContentLoaded", () => {
+        const logoutButton = document.getElementById("logoutButton");
+        if (logoutButton) {
+          logoutButton.addEventListener("click", () => {
+            // Clear the token cookie by setting its expiration date to the past
+            // Try different paths to ensure it’s removed correctly
+            document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/static;";
+            document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=127.0.0.1;";
+            document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/static; domain=127.0.0.1;";
 
-          // Redirect to login page
-          window.location.href = "login.htm";
-        });
-      } else {
-        console.warn("Logout button not found in the DOM.");
-      }
-    });
+            // Redirect to login page
+            window.location.href = "login.htm";
+          });
+        } else {
+          console.warn("Logout button not found in the DOM.");
+        }
+      });
 
       window.addEventListener("load", () => {
         const loader = document.querySelector(".loader");
@@ -85,10 +104,67 @@
           }
         }
 
+        $("#search-input").autocomplete({
+          source: function (request, response) {
+            // Perform an AJAX request for autocomplete suggestions
+            $.ajax({
+              url: "http://5.75.182.107:8024/autocomplete_foodspots", // Your backend API endpoint
+              method: "GET",
+              dataType: "json",
+              data: {
+                q: request.term // Send the search term
+              },
+              headers: {
+                Authorization: `Bearer ${getcookie("token")}` // Include token for authorization
+              },
+              success: function (data) {
+                response(data); // Provide suggestions to the autocomplete widget
+              },
+              error: function (xhr, status, error) {
+                console.error("Error fetching autocomplete suggestions:", error);
+              }
+            });
+          },
+          minLength: 2, // Trigger autocomplete after 2+ characters
+          select: function (event, ui) {
+            console.log("Selected:", ui.item.value);
+            const selectedQuery = ui.item.value;
+
+            // Update the input with the selected value
+            $(this).val(selectedQuery);
+
+            // Trigger a search or another function
+            fetchFoodSpots(selectedQuery);
+            
+          },
+          open: function () {
+            // Optional: Apply a custom z-index for the dropdown if needed
+            $(".ui-autocomplete").css("z-index", 9999);
+            // Clear the accessibility message
+            $(".ui-helper-hidden-accessible").empty();
+          }
+        });
+    
         // Attach search input debounce functionality
+        
         const searchInput = document.querySelector('.search-box input[type="text"]');
         searchInput.addEventListener("input", debouncedFetchFoodSpots);
       };
+
+      function renderFoodSpots(foodSpots) {
+        const $restaurantList = $(".restaurant-list"); // Select the container using jQuery
+        $restaurantList.empty(); // Clear any existing content
+    
+        foodSpots.forEach((spot) => {
+          const $spotElement = $(`
+            <div class="restaurant-item">
+              <h3>${spot.name}</h3>
+              <p>${spot.description}</p>
+            </div>
+          `);
+          $restaurantList.append($spotElement); // Append each dynamically created element
+        });
+      }
 
       async function checkUserRole(query = "") {
         try {
@@ -258,11 +334,14 @@
         </div>
       </div>
     </header>
+
     <div class="loader"></div>
+
     <section id="search" class="search-section">
       <h1>Search Restaurant & Café</h1>
       <div class="search-box">
         <input
+          id="search-input"
           style="width: 230px"
           type="text"
           placeholder="Restaurant & Café"
