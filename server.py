@@ -858,10 +858,14 @@ def update_foodspot(foodspot_id):
 def delete_foodspot(foodspot_id):
     user_id = extract_user_id_from_token()
     
+    print(user_id)
+
     # Check if the user is an admin
     if not is_admin(user_id):
         return jsonify({'error': 'Unauthorized. Only admins can delete a food spot.'}), 403
 
+    print("admindi qaqasss")
+    print(foodspot_id)
     conn = get_db_connection()
     cursor = conn.cursor()
 
