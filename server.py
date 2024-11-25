@@ -783,6 +783,8 @@ def add_foodspot():
 
         # Retrieve the newly created FoodSpotId
         foodspot_id = cursor.lastrowid
+        print("BAAAAAAAX FoooodSpot ID: ::::::::::\n")
+        print(foodspot_id)
 
         # If it's a restaurant, insert into the restaurant table
         if is_restaurant:
