@@ -463,11 +463,14 @@ def login():
 
     try:
         login_query = """
-            SELECT u.Id
-            FROM users u
-            LEFT JOIN admin a ON u.Id = a.UserId
-            LEFT JOIN customer c ON u.Id = c.UserId
-            WHERE u.Email = %s AND u.Password = %s
+        SELECT u.Id AS userId,
+        CASE 
+            WHEN a.Id IS NOT NULL THEN 1
+            ELSE 0
+        END AS isAdmin
+        FROM users u
+        LEFT JOIN admin a ON u.Id = a.UserId
+        WHERE u.Email = %s AND u.Password = %s
         """
         cursor.execute(login_query, (email, password))
         result = cursor.fetchone()
