@@ -463,7 +463,7 @@ def login():
 
     try:
         login_query = """
-            SELECT Id
+            SELECT u.Id
             FROM users u
             LEFT JOIN admin a ON u.Id = a.UserId
             LEFT JOIN customer c ON u.Id = c.UserId
