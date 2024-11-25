@@ -759,40 +759,31 @@ def add_foodspot():
     phone_number = data['phoneNumber']
     opening_time = data['openingTime']
     closing_time = data['closingTime']
-    rating = data.get('rating', 0)  
-    is_restaurant = data.get('isRestaurant', True) 
+    rating = data.get('rating', 0)  # Default to 0 if no rating is provided
+    is_restaurant = data.get('isRestaurant', True)  # Assume it's a restaurant by default
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        # Retrieve AdminId using UserId
-        admin_query = "SELECT Id FROM admin WHERE UserId = %s"
-        cursor.execute(admin_query, (user_id,))
-        admin = cursor.fetchone()
-        if not admin:
-            return jsonify({'error': 'Admin not found for the given user.'}), 404
-        admin_id = admin[0]
-
         # Insert into FoodSpot table
         foodspot_query = """
             INSERT INTO foodspot (AdminId, Name, Address, ImageUrl, PhoneNumber, OpeningTime, ClosingTime, Rating)
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(foodspot_query, (admin_id, name, address, image_url, phone_number, opening_time, closing_time, rating))
+        cursor.execute(foodspot_query, (user_id, name, address, image_url, phone_number, opening_time, closing_time, rating))
 
-        # Retrieve the newly created FoodSpotId
-        foodspot_id = cursor.lastrowid
-        print("BAAAAAAAX FoooodSpot ID: ::::::::::\n")
+        # Retrieve the auto-generated FoodSpotId
+        cursor.execute("SELECT LAST_INSERT_ID()")
+        foodspot_id = cursor.fetchone()[0]
+        print("FOODSPOTID:::::::::\n")
         print(foodspot_id)
-
-        # If it's a restaurant, insert into the restaurant table
         if is_restaurant:
+            # Insert into Restaurant table using the same FoodSpotId
             restaurant_query = "INSERT INTO restaurant (FoodSpotId) VALUES (%s)"
             cursor.execute(restaurant_query, (foodspot_id,))
 
         conn.commit()
-
         return jsonify({'message': 'FoodSpot added successfully', 'foodSpotId': foodspot_id}), 201
     except mysql.connector.Error as err:
         conn.rollback()
