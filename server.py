@@ -857,23 +857,46 @@ def update_foodspot(foodspot_id):
 @token_required
 def delete_foodspot(foodspot_id):
     user_id = extract_user_id_from_token()
-    
-    print(user_id)
 
     # Check if the user is an admin
     if not is_admin(user_id):
         return jsonify({'error': 'Unauthorized. Only admins can delete a food spot.'}), 403
 
-    print("admindi qaqasss")
-    print(foodspot_id)
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
-        delete_query = "DELETE FROM foodspot WHERE Id = %s"
-        cursor.execute(delete_query, (foodspot_id,))
-        conn.commit()
+        # Check if the FoodSpot exists
+        check_query = "SELECT Id FROM foodspot WHERE Id = %s"
+        cursor.execute(check_query, (foodspot_id,))
+        if cursor.fetchone() is None:
+            return jsonify({'error': 'FoodSpot not found'}), 404
 
+        # Check if the FoodSpot is a Cafe or Restaurant
+        check_cafe_query = "SELECT Id FROM cafe WHERE FoodSpotId = %s"
+        cursor.execute(check_cafe_query, (foodspot_id,))
+        cafe = cursor.fetchone()
+
+        if cafe:
+            # Delete from Cafe table
+            delete_cafe_query = "DELETE FROM cafe WHERE FoodSpotId = %s"
+            cursor.execute(delete_cafe_query, (foodspot_id,))
+        else:
+            # Check if the FoodSpot is a Restaurant
+            check_restaurant_query = "SELECT Id FROM restaurant WHERE FoodSpotId = %s"
+            cursor.execute(check_restaurant_query, (foodspot_id,))
+            restaurant = cursor.fetchone()
+
+            if restaurant:
+                # Delete from Restaurant table
+                delete_restaurant_query = "DELETE FROM restaurant WHERE FoodSpotId = %s"
+                cursor.execute(delete_restaurant_query, (foodspot_id,))
+
+        # Finally, delete from FoodSpot table
+        delete_foodspot_query = "DELETE FROM foodspot WHERE Id = %s"
+        cursor.execute(delete_foodspot_query, (foodspot_id,))
+
+        conn.commit()
         return jsonify({'message': 'FoodSpot deleted successfully'}), 200
     except mysql.connector.Error as err:
         conn.rollback()
