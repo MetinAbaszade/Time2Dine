@@ -11,26 +11,29 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
     />
+    <style>
+      .autocomplete-box {
+        max-width: 500px;
+        margin: auto;
+      }
+      input {
+        width: 100%;
+        padding: 8px;
+        font-size: 16px;
+      }
+    </style>
+
+    <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.min.js"></script>
+
   </head>
 
   <body>
     <div class="loader"></div>
-    <!-- <header>
-      <div class="logo">
-        <a href="index.htm">Time2Dine</a>
-      </div>
-      <div class="navbar">
-        <div class="menu-button">
-          <a href="#">Menu</a>
-        </div>
-        <ul class="dropdown-menu">
-          <li><a href="index.htm">Home</a></li>
-          <li><a href="login.htm">Log In</a></li>
-          <li><a href="register.htm">Register</a></li>
-          <li><a href="fav.htm">Favorites</a></li>
-        </ul>
-      </div>
-    </header> -->
     <header>
       <div class="logo">
         <a href="index.htm"> Time2Dine </a>
@@ -99,8 +102,23 @@
         });
       });
       
+      function renderFoodSpots(foodSpots) {
+        const $restaurantList = $(".restaurant-list"); // Select the container using jQuery
+        $restaurantList.empty(); // Clear any existing content
+    
+        foodSpots.forEach((spot) => {
+          const $spotElement = $(`
+            <div class="restaurant-item">
+              <h3>${spot.name}</h3>
+              <p>${spot.description}</p>
+            </div>
+          `);
+          $restaurantList.append($spotElement); // Append each dynamically created element
+        });
+      }
+
       const token = getcookie("token");
-      // Function to debounce input
+  
       function debounce(func, delay) {
         let timeout;
         return function (...args) {
@@ -218,10 +236,59 @@
         debouncedFetchFavorites(query); // Fetch favorites based on search query with debounce
       });
 
-      // Initial fetch of favorites without search
+      // window.onload = function () {
+      //   fetchFavorites();
+      // };
       window.onload = function () {
-        fetchFavorites();
+        const token = getcookie("token");
+    
+        if (!token) {
+          // Redirect to login page immediately if token is missing
+          window.location.href = "login.htm";
+        } else {
+          fetchFavorites();
+          // Show the body if the token exists
+          document.body.style.display = "block";
+        }
+    
+        // Attach autocomplete functionality to the search input
+        $("#search-input").autocomplete({
+          source: function (request, response) {
+            // Perform an AJAX request for autocomplete suggestions
+            $.ajax({
+              url: "http://5.75.182.107:8024/autocomplete_favorites", 
+              // url: "http://5.75.182.107:8024/autocomplete_foodspots",
+              dataType: "json",
+              data: {
+                q: request.term // Send the search term
+              },
+              headers: {
+                Authorization: `Bearer ${getcookie("token")}` // Include token for authorization
+              },
+              success: function (data) {
+                response(data); // Provide suggestions to the autocomplete widget
+              },
+              error: function (xhr, status, error) {
+                console.error("Error fetching autocomplete suggestions:", error);
+              }
+            });
+          },
+          minLength: 2, // Trigger autocomplete after 2+ characters
+          select: function (event, ui) {
+            console.log("Selected:", ui.item.value);
+            const selectedQuery = ui.item.value;
+            fetchFavorites(selectedQuery);
+          },
+          open: function () {
+            // Optional: Apply a custom z-index for the dropdown if needed
+            $(".ui-autocomplete").css("z-index", 9999);
+            // Clear the accessibility message
+            $(".ui-helper-hidden-accessible").empty();
+          }
+        });
+      
       };
+  
     </script>
   </body>
 </html>
