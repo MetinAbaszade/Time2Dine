@@ -275,6 +275,8 @@ def add_user():
 
         # Get the newly created User ID
         new_user_id = cursor.lastrowid
+        
+        print("NEW USER ID:::::::::\n", new_user_id)
 
         if is_admin_flag:
             admin_query = "INSERT INTO admin (UserId) VALUES (%s)"
@@ -785,8 +787,6 @@ def add_foodspot():
         """
         cursor.execute(foodspot_id_query, (user_id, name, address))
         foodspot_id = cursor.fetchone()[0]
-
-        print("FOODSPOTID:::::::::\n", foodspot_id)
 
         # If it's a restaurant, insert into Restaurant table
         if is_restaurant:
