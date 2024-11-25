@@ -162,6 +162,7 @@ def token_required(f):
     return decorated
 
 def is_admin(user_id):
+    print(user_id)
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -169,6 +170,7 @@ def is_admin(user_id):
         admin_query = "SELECT Id FROM admin WHERE UserId = %s"
         cursor.execute(admin_query, (user_id,))
         is_admin = cursor.fetchone() is not None
+        print(is_admin)
         return is_admin
     finally:
         cursor.close()
