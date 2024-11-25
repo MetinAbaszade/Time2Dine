@@ -6,6 +6,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"/>
     <link rel="stylesheet" href="/static/resadd.css">
+    <script src="/static/utils.js"></script>
     <title>Add User</title>
 </head>
 <body>
@@ -13,7 +14,7 @@
     <div class="form-container">
         <h2 class="mb-4 text-center">Add User</h2>
 
-        <form id="restaurantForm">
+        <form id="userForm">
             <div class="form-row">
                 <div class="left">
                     <!-- First Name -->
@@ -81,13 +82,7 @@
 </div>
 
 <script>
-    function getcookie(name) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop().split(";").shift();
-    }
-
-    document.getElementById('restaurantForm').addEventListener('submit', async function(event) {
+    document.getElementById('userForm').addEventListener('submit', async function(event) {
         event.preventDefault();
         
         const userData = {
@@ -99,7 +94,7 @@
             DateOfBirth: document.getElementById('dateofbirth').value,  // Adjusted ID
             isAdmin: document.getElementById('isAdmin').checked         // Checkbox
         };
-
+        
         // console.log(userData);
         try {
             const token = getcookie("token");
@@ -121,7 +116,7 @@
                 messageElement.innerHTML = `<div class="alert alert-success">Food spot added successfully!</div>`;
                 
                 // Clear form inputs after successful addition
-                document.getElementById('restaurantForm').reset();
+                document.getElementById('userForm').reset();
             } else {
                 messageElement.innerHTML = `<div class="alert alert-danger">Error: ${result.error}</div>`;
             }
