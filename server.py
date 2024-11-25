@@ -273,14 +273,19 @@ def add_user():
         """
         cursor.execute(user_query, (first_name, last_name, email, password, date_of_birth, phone_number))
 
-        # Get the newly created User ID
-        new_user_id = cursor.lastrowid
-        
-        print("NEW USER ID:::::::::\n", new_user_id)
-
+        # Insert into Admin or Customer table using a subquery to retrieve UserId
         if is_admin_flag:
-            admin_query = "INSERT INTO admin (UserId) VALUES (%s)"
-            cursor.execute(admin_query, (new_user_id,))
+            admin_query = """
+                INSERT INTO admin (UserId)
+                SELECT Id FROM users WHERE Email = %s
+            """
+            cursor.execute(admin_query, (email,))
+        else:
+            customer_query = """
+                INSERT INTO customer (UserId)
+                SELECT Id FROM users WHERE Email = %s
+            """
+            cursor.execute(customer_query, (email,))
 
         conn.commit()
         return jsonify({'message': 'User added successfully with role'}), 201
@@ -290,6 +295,7 @@ def add_user():
     finally:
         cursor.close()
         conn.close()
+
 
 @app.route('/register_user', methods=['POST'])
 def register_user():   
@@ -312,11 +318,12 @@ def register_user():
         """
         cursor.execute(user_query, (first_name, last_name, email, password, date_of_birth, phone_number))
 
-        # Get the newly created User ID
-        new_user_id = cursor.lastrowid
-
-        customer_query = "INSERT INTO customer (UserId) VALUES (%s)"
-        cursor.execute(customer_query, (new_user_id,))
+        # Insert into Customer table using a subquery to retrieve UserId
+        customer_query = """
+            INSERT INTO customer (UserId)
+            SELECT Id FROM users WHERE Email = %s
+        """
+        cursor.execute(customer_query, (email,))
 
         conn.commit()
         return jsonify({'message': 'User registered successfully with role'}), 201
@@ -609,12 +616,13 @@ def autocomplete_favorites():
     cursor = conn.cursor(dictionary=True)
 
     try:
-        # Query to fetch matching favorites based on the search query
+        # Query to fetch matching favorites based on the search query and UserId
         favorites_query = """
             SELECT fs.Name
             FROM favorites f
             JOIN foodspot fs ON f.FoodSpotId = fs.Id
-            WHERE f.CustomerId = %s AND fs.Name LIKE %s
+            WHERE f.CustomerId = (SELECT Id FROM customer WHERE UserId = %s)
+              AND fs.Name LIKE %s
         """
         cursor.execute(favorites_query, (user_id, '%' + search_query + '%'))
         favorites = cursor.fetchall()
