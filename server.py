@@ -162,7 +162,6 @@ def token_required(f):
     return decorated
 
 def is_admin(user_id):
-    print(user_id)
     conn = get_db_connection()
     cursor = conn.cursor()
     try:
@@ -170,7 +169,6 @@ def is_admin(user_id):
         admin_query = "SELECT Id FROM admin WHERE UserId = %s"
         cursor.execute(admin_query, (user_id,))
         is_admin = cursor.fetchone() is not None
-        print(is_admin)
         return is_admin
     finally:
         cursor.close()
@@ -857,23 +855,14 @@ def delete_foodspot(foodspot_id):
 def check_if_admin():
     # Extract userId from the token
     user_id = extract_user_id_from_token()
-    
-    # Check if the user is an admin
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
+
     try:
-        admin_query = "SELECT Id FROM admin WHERE Id = %s"
-        cursor.execute(admin_query, (user_id,))
-        is_admin = cursor.fetchone() is not None
-        
-        # Return JSON response with the result
-        return jsonify({'isAdmin': is_admin}), 200
+        # Use the utility function to check admin status
+        is_admin_status = is_admin(user_id)
+
+        return jsonify({'isAdmin': is_admin_status}), 200
     except mysql.connector.Error as err:
         return jsonify({'error': str(err)}), 500
-    finally:
-        cursor.close()
-        conn.close()
 
 @app.route('/logs/error', methods=['GET'])
 def get_parsed_error_log():
