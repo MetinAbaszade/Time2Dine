@@ -166,7 +166,7 @@ def is_admin(user_id):
     cursor = conn.cursor()
     try:
         # Check if the user has an admin role
-        admin_query = "SELECT Id FROM admin WHERE Id = %s"
+        admin_query = "SELECT Id FROM admin WHERE UserId = %s"
         cursor.execute(admin_query, (user_id,))
         is_admin = cursor.fetchone() is not None
         return is_admin
@@ -463,14 +463,7 @@ def login():
 
     try:
         login_query = """
-            SELECT CASE 
-                       WHEN a.Id IS NOT NULL THEN a.Id
-                       WHEN c.Id IS NOT NULL THEN c.Id
-                   END AS id,
-                   CASE 
-                       WHEN a.Id IS NOT NULL THEN 1
-                       ELSE 0
-                   END AS isAdmin
+            SELECT Id
             FROM users u
             LEFT JOIN admin a ON u.Id = a.UserId
             LEFT JOIN customer c ON u.Id = c.UserId
