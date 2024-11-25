@@ -166,7 +166,7 @@ def is_admin(user_id):
     cursor = conn.cursor()
     try:
         # Check if the user has an admin role
-        admin_query = "SELECT Id FROM admin WHERE Id = %s"
+        admin_query = "SELECT Id FROM admin WHERE UserId = %s"
         cursor.execute(admin_query, (user_id,))
         is_admin = cursor.fetchone() is not None
         return is_admin
@@ -463,18 +463,14 @@ def login():
 
     try:
         login_query = """
-            SELECT CASE 
-                       WHEN a.Id IS NOT NULL THEN a.Id
-                       WHEN c.Id IS NOT NULL THEN c.Id
-                   END AS id,
-                   CASE 
-                       WHEN a.Id IS NOT NULL THEN 1
-                       ELSE 0
-                   END AS isAdmin
-            FROM users u
-            LEFT JOIN admin a ON u.Id = a.UserId
-            LEFT JOIN customer c ON u.Id = c.UserId
-            WHERE u.Email = %s AND u.Password = %s
+        SELECT u.Id AS userId,
+        CASE 
+            WHEN a.Id IS NOT NULL THEN 1
+            ELSE 0
+        END AS isAdmin
+        FROM users u
+        LEFT JOIN admin a ON u.Id = a.UserId
+        WHERE u.Email = %s AND u.Password = %s
         """
         cursor.execute(login_query, (email, password))
         result = cursor.fetchone()
@@ -507,29 +503,39 @@ def toggle_favorite():
     user_id = extract_user_id_from_token()
     data = request.json
     food_spot_id = data['foodSpotId']
-    print(f"favourites e sorqu gelidiiididididi: {user_id} \n {food_spot_id}")
 
     conn = get_db_connection()
     cursor = conn.cursor()
 
     try:
+        # Check if the user has already marked the food spot as favorite in a single query
         check_favorite_query = """
-            SELECT * FROM favorites WHERE FoodSpotId = %s AND CustomerId = %s
+            SELECT f.* 
+            FROM favorites f
+            JOIN customer c ON f.CustomerId = c.Id
+            WHERE f.FoodSpotId = %s AND c.UserId = %s
         """
         cursor.execute(check_favorite_query, (food_spot_id, user_id))
         favorite = cursor.fetchone()
 
         if favorite:
+            # Remove the favorite if it already exists
             remove_favorite_query = """
-                DELETE FROM favorites WHERE FoodSpotId = %s AND CustomerId = %s
+                DELETE f
+                FROM favorites f
+                JOIN customer c ON f.CustomerId = c.Id
+                WHERE f.FoodSpotId = %s AND c.UserId = %s
             """
             cursor.execute(remove_favorite_query, (food_spot_id, user_id))
             conn.commit()
             return jsonify({'message': 'Removed from favorites successfully'}), 200
         else:
+            # Add the favorite if it doesn't exist
             add_favorite_query = """
                 INSERT INTO favorites (FoodSpotId, CustomerId)
-                VALUES (%s, %s)
+                SELECT %s, c.Id
+                FROM customer c
+                WHERE c.UserId = %s
             """
             cursor.execute(add_favorite_query, (food_spot_id, user_id))
             conn.commit()
@@ -547,10 +553,12 @@ def toggle_favorite():
 def get_favorites():
     user_id = extract_user_id_from_token()
     search_query = request.args.get('q', '')
+
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
     try:
+        # Fetch all favorites in a single query by joining with the Customer table
         favorites_query = """
             SELECT fs.Id AS FoodSpotId, 
                    fs.Name, 
@@ -562,15 +570,14 @@ def get_favorites():
                        ELSE 'Unknown'
                    END AS FoodSpotType,
                    COALESCE(r.Id, c.Id) AS TypeSpecificId,
-                   TRUE AS isFavorite  -- Always true since this is the favorites list
+                   TRUE AS isFavorite
             FROM favorites f
             JOIN foodspot fs ON f.FoodSpotId = fs.Id
+            JOIN customer cu ON f.CustomerId = cu.Id
             LEFT JOIN restaurant r ON fs.Id = r.FoodSpotId
             LEFT JOIN cafe c ON fs.Id = c.FoodSpotId
-            WHERE f.CustomerId = %s
+            WHERE cu.UserId = %s
         """
-
-        # If a search query is provided, add a LIKE clause to filter by name
         if search_query:
             favorites_query += " AND fs.Name LIKE %s"
             cursor.execute(favorites_query, (user_id, f'%{search_query}%'))
@@ -579,7 +586,6 @@ def get_favorites():
 
         favorites = cursor.fetchall()
 
-        # Convert any datetime or timedelta values to strings for JSON serialization
         for favorite in favorites:
             for key, value in favorite.items():
                 if isinstance(value, (datetime.datetime, datetime.date, datetime.timedelta)):
@@ -657,24 +663,35 @@ def get_foodspots():
 
     try:
         foodspots_query = """
-            SELECT fs.Id AS FoodSpotId, fs.Name, fs.Rating, fs.ImageUrl, 
-                   CASE 
-                       WHEN r.Id IS NOT NULL THEN 'Restaurant'
-                       WHEN c.Id IS NOT NULL THEN 'Cafe'
-                       ELSE 'Unknown'
-                   END AS FoodSpotType,
-                   r.Id AS RestaurantId,
-                   c.Id AS CafeId,
-                   CASE 
-                       WHEN f.CustomerId IS NOT NULL THEN TRUE
-                       ELSE FALSE
-                   END AS IsFavorite
+            SELECT 
+                fs.Id AS FoodSpotId, 
+                fs.Name, 
+                fs.Rating, 
+                fs.ImageUrl, 
+                CASE 
+                    WHEN r.Id IS NOT NULL THEN 'Restaurant'
+                    WHEN c.Id IS NOT NULL THEN 'Cafe'
+                    ELSE 'Unknown'
+                END AS FoodSpotType,
+                r.Id AS RestaurantId,
+                c.Id AS CafeId,
+                CASE 
+                    WHEN f.CustomerId IS NOT NULL THEN TRUE
+                    ELSE FALSE
+                END AS IsFavorite
             FROM foodspot fs
             LEFT JOIN restaurant r ON fs.Id = r.FoodSpotId
             LEFT JOIN cafe c ON fs.Id = c.FoodSpotId
-            LEFT JOIN favorites f ON fs.Id = f.FoodSpotId AND f.CustomerId = %s
+            LEFT JOIN favorites f 
+                ON fs.Id = f.FoodSpotId 
+                AND f.CustomerId = (
+                    SELECT Id 
+                    FROM customer 
+                    WHERE UserId = %s
+                )
             WHERE fs.Name LIKE %s
         """
+
         cursor.execute(foodspots_query, (user_id, '%' + search_query + '%'))  
         foodspots = cursor.fetchall()
 
@@ -859,23 +876,14 @@ def delete_foodspot(foodspot_id):
 def check_if_admin():
     # Extract userId from the token
     user_id = extract_user_id_from_token()
-    
-    # Check if the user is an admin
-    conn = get_db_connection()
-    cursor = conn.cursor()
-    
+
     try:
-        admin_query = "SELECT Id FROM admin WHERE Id = %s"
-        cursor.execute(admin_query, (user_id,))
-        is_admin = cursor.fetchone() is not None
-        
-        # Return JSON response with the result
-        return jsonify({'isAdmin': is_admin}), 200
+        # Use the utility function to check admin status
+        is_admin_status = is_admin(user_id)
+
+        return jsonify({'isAdmin': is_admin_status}), 200
     except mysql.connector.Error as err:
         return jsonify({'error': str(err)}), 500
-    finally:
-        cursor.close()
-        conn.close()
 
 @app.route('/logs/error', methods=['GET'])
 def get_parsed_error_log():
