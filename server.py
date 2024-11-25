@@ -325,7 +325,6 @@ def register_user():
         cursor.close()
         conn.close()
 
-
 @app.route('/update_user/<user_id_to_update>', methods=['PUT'])
 @token_required
 def update_user(user_id_to_update):
@@ -760,7 +759,8 @@ def add_foodspot():
     phone_number = data['phoneNumber']
     opening_time = data['openingTime']
     closing_time = data['closingTime']
-    rating = data.get('rating', 0) 
+    rating = data.get('rating', 0)  
+    is_restaurant = data.get('isRestaurant', True) 
 
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -780,9 +780,18 @@ def add_foodspot():
             VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
         """
         cursor.execute(foodspot_query, (admin_id, name, address, image_url, phone_number, opening_time, closing_time, rating))
+
+        # Retrieve the newly created FoodSpotId
+        foodspot_id = cursor.lastrowid
+
+        # If it's a restaurant, insert into the restaurant table
+        if is_restaurant:
+            restaurant_query = "INSERT INTO restaurant (FoodSpotId) VALUES (%s)"
+            cursor.execute(restaurant_query, (foodspot_id,))
+
         conn.commit()
 
-        return jsonify({'message': 'FoodSpot added successfully'}), 201
+        return jsonify({'message': 'FoodSpot added successfully', 'foodSpotId': foodspot_id}), 201
     except mysql.connector.Error as err:
         conn.rollback()
         return jsonify({'error': str(err)}), 500
